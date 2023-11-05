@@ -1380,4 +1380,50 @@ http_interactions:
         \     \"name\" : \"Taipei Main Station\",\n      \"place_id\" : \"ChIJlWImqHKpQjQREk5-6lec4-w\",\n
         \     \"rating\" : 4.3\n   },\n   \"status\" : \"OK\"\n}"
   recorded_at: Wed, 01 Nov 2023 08:17:09 GMT
+- request:
+    method: get
+    uri: https://maps.googleapis.com/maps/api/place/findplacefromtext/json?fields=place_id,name&input=%E6%96%B0%E7%AB%B9%E5%8B%95%E7%89%A9%E5%9C%92&inputtype=textquery&key=<GMAP_TOKEN>
+    body:
+      encoding: ASCII-8BIT
+      string: ''
+    headers:
+      Connection:
+      - close
+      Host:
+      - maps.googleapis.com
+      User-Agent:
+      - http.rb/5.1.1
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=UTF-8
+      Date:
+      - Sun, 05 Nov 2023 16:22:47 GMT
+      Expires:
+      - Sun, 05 Nov 2023 16:27:47 GMT
+      Cache-Control:
+      - public, max-age=300
+      Server:
+      - scaffolding on HTTPServer2
+      Content-Length:
+      - '163'
+      X-Xss-Protection:
+      - '0'
+      X-Frame-Options:
+      - SAMEORIGIN
+      Server-Timing:
+      - gfet4t7; dur=321
+      Alt-Svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      Connection:
+      - close
+    body:
+      encoding: UTF-8
+      string: "{\n   \"candidates\" : \n   [\n      {\n         \"name\" : \"新竹市立動物園\",\n
+        \        \"place_id\" : \"ChIJl78Wnt01aDQRz1shOsBVUGU\"\n      }\n   ],\n
+        \  \"status\" : \"OK\"\n}"
+  recorded_at: Sun, 05 Nov 2023 16:22:43 GMT
 recorded_with: VCR 6.2.0
