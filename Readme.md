@@ -1,22 +1,24 @@
-# Google Maps API Client
-Project to gather useful information from google maps API
+# TravelRoute
+Application to allow travellers to plan their trip effortlessly
 
-## Resources
-* Place
+## Overview
+TravelRoute gets data from GoogleMap's API, 
 
-## Elements
-* place
-    * list of reviews
-    * address
-    * place type
-    * list of nearby places
-* route
-    * list of places
-* route_matrix
-    * list of routes
+## Objectives
+### Short-term usability goals
+* Pull data from GoogleMaps API
+* Display the order to visit place
+  * Places can be clicked to show further details
 
-## Entities
-objects that are important to the project
-* Place (All the info that is related to a place)
-* Route (records route from source to destination)
-* Route Matrix (matrix of information for recommended routes between multiple start and end points)
+### Long-term goals
+* Multi-Stage Travel Planner
+  * Pick the places you are interested in
+  * Specify Constraints (Priority, Preferences Modify Information)
+  * Page For Checking out the final plan
+
+## Setup
+* Create a Google API access key
+* Add the required thingy into config/secrets.yml
+* Run `bundle install`
+* Run `bundle exec rake db:migrate`
+* Run `RACK_ENV=test bundle exec rake db:migrate`
