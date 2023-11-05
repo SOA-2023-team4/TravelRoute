@@ -39,9 +39,9 @@ module TravelRoute
       end
 
       def self.rebuild_many(db_records)
-        db_records.map{ |db_record|
+        db_records.map do |db_record|
           rebuild_entity(db_record)
-        }
+        end
       end
     end
   end
