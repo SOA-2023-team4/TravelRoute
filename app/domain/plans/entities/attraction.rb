@@ -9,11 +9,11 @@ module TravelRoute
     class Attraction < Dry::Struct
       include Dry.Types
 
-      attribute :place_id,      Strict::String
-      attribute :name,          Strict::String
-      attribute :address,       Strict::String
-      attribute :opening_hours, Strict::Hash.optional
-      attribute :rating,        Coercible::Float.optional
+      attribute :place_id,        Strict::String
+      attribute :name,            Strict::String
+      attribute :address,         Strict::String
+      attribute? :opening_hours,  Strict::Hash.optional
+      attribute :rating,          Coercible::Float.optional
 
       def to_attr_hash
         to_hash.except(:opening_hours)
