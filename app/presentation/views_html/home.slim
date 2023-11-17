@@ -1,5 +1,5 @@
 .container
-  .row.mt-4
+  .row.mt-5
     .col-8
       h2 Search for Attractions
       form role="form" action="/search" method="POST" id="attraction-search-form"
@@ -8,7 +8,7 @@
           button type="button" class="btn btn-primary" id="attraction-search-button" Search
       ul class="list-group" id="attraction-search-results"
     .col-4
-      ul class="list-group"
+      ul class="list-group sticky-card" id="attraction-cart"
         .card.border-light.mb-3 id="attraction-list"
           .card-header
             .row

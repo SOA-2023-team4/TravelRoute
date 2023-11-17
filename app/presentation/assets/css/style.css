@@ -12,21 +12,12 @@ h1 {
   font-size: 1.2em;
 }
 
-/* .project.attribute {
-  font-weight: bold;
+.sticky-card {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 10%;
+  z-index: 1020;
 }
-
-.project.detail {
-  color: grey;
-}
-
-.project.owner {
-  font-weight: bold
-}
-
-.project.name {
-  
-} */
 
 .vcenter {
   display: inline-block;
