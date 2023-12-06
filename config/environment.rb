@@ -4,7 +4,6 @@ require 'figaro'
 require 'logger'
 require 'rack/session'
 require 'roda'
-require 'sequel'
 
 module TravelRoute
   # Configuration for the App
@@ -21,14 +20,9 @@ module TravelRoute
 
     use Rack::Session::Cookie, secret: config.SESSION_SECRET
 
-    configure :development, :test do
-      require 'pry'
-      ENV['DATABASE_URL'] = "sqlite://#{config.DB_FILENAME}"
+    configure :development, :test, :app_test do
+      require 'pry'; # for breakpoints
     end
-
-    # Database Setup
-    @db = Sequel.connect(ENV.fetch('DATABASE_URL'))
-    def self.db = @db # rubocop:disable Style/TrivialAccessors
 
     # Logger
     @logger = Logger.new($stderr)
