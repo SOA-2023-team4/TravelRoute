@@ -37,8 +37,18 @@ module TravelRoute
           get(['search'], params:)
         end
 
-        def add_attraction(body)
-          post(['attractions'], body:)
+        def add_attraction(place_id)
+          get(['attractions', place_id])
+        end
+
+        def get_recommendations(place_id)
+          get(['recommendations', place_id])
+        end
+
+        def get_plan(origin, attractions)
+          attraction_list = attractions.join(',')
+          params = { origin:, attractions: CGI.escape(attraction_list) }
+          get(['plans'], params:)
         end
 
         private
