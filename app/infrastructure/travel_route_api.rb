@@ -19,6 +19,11 @@ module TravelRoute
         @request.search(search_term)
       end
 
+      def add_attraction(place_id)
+        @request.add_attraction(place_id)
+      end
+
+
       # HTTP Request
       class Request
         API_ROOT_ENDPOINT = '/api/v1'
@@ -34,7 +39,7 @@ module TravelRoute
 
         def search(search_term)
           params = { search: CGI.escape(search_term) }
-          get(['search'], params:)
+          get(['attractions'], params:)
         end
 
         def add_attraction(place_id)
@@ -55,7 +60,7 @@ module TravelRoute
 
         def get(path = [], params: {})
           api_endpoint = path.empty? ? @api_host : @api_root
-          url = api_endpoint + path.join('/')
+          url = "#{api_endpoint}/" + path.join('/')
           HTTP.headers('Content-Type' => 'application/json')
             .get(url, params:)
             .then { |response| Response.new(response) }
@@ -65,7 +70,7 @@ module TravelRoute
 
         def post(path = [], body: {}, params: {})
           api_endpoint = path.empty? ? @api_host : @api_root
-          url = api_endpoint + path.join('/')
+          url = "#{api_endpoint}/" + path.join('/')
           HTTP.headers('Content-Type' => 'application/json')
             .post(url, params:, json: body)
             .then { |response| Response.new(response) }
@@ -89,7 +94,7 @@ module TravelRoute
         end
 
         def payload
-          payload.to_s
+          body.to_s
         end
       end
     end
