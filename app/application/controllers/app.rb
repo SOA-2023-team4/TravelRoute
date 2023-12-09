@@ -48,21 +48,12 @@ module TravelRoute
         routing.is do
           routing.post do
             req = JSON.parse(routing.body.read, symbolize_names: true)
-            val_req = Forms::SearchAttraction.new.call(req)
-
-            if val_req.failure?
-              flash[:error] = val_req.errors.messages.join('; ')
-              routing.halt 400
-            end
-
-            search_term = val_req[:search_term]
-            search_result = Service::SearchAttractions.new.call(search_term)
-
+            search_req = Forms::SearchAttraction.new.call(req)
+            search_result = Service::SearchAttractions.new.call(search_req)
             if search_result.failure?
               flash[:error] = search_result.failure
               routing.halt 500
             end
-
             searched_attraction = search_result.value!
             Views::AttractionList.new(searched_attraction).to_json
           end
