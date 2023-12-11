@@ -27,11 +27,11 @@ module TravelRoute
         result = Gateway::Api.new(TravelRoute::App.config).search_attractions(input[:search_term])
         result.success? ? Success(result.payload) : Failure(result.message)
       rescue StandardError
-        Failure('Could not connect to Google Maps API')
+        Failure('Could not connect to Travel Route API')
       end
 
       def reify_attraction(attractions_json)
-        Representer::Attraction.new(attractions_json)
+        Representer::AttractionsList.new(OpenStruct.new).from_json(attractions_json)
           .then { |attraction| Success(attraction) }
       rescue StandardError
         Failure('Error in Attraction')

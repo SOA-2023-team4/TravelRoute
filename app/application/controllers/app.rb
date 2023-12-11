@@ -54,8 +54,7 @@ module TravelRoute
               flash[:error] = search_result.failure
               routing.halt 500
             end
-            searched_attraction = search_result.value!
-            Views::AttractionList.new(searched_attraction).to_json
+            Views::AttractionList.new(search_result.value!.attractions).to_json
           end
         end
       end
@@ -64,26 +63,16 @@ module TravelRoute
         routing.is do
           # POST /attractions
           routing.post do
-            req = JSON.parse(routing.body.read)
+            req = JSON.parse(routing.body.read, symbolize_names: true)
             val_req = Forms::NewAttraction.new.call(req)
-
-            if val_req.failure?
-              flash[:error] = val_req.errors.messages.join('; ')
-              routing.halt 400
-            end
-
-            selected = JSON.parse(val_req['selected'], symbolize_names: true)
-            add_result = Service::AddAttraction.new.call(selected)
-
+            add_result = Service::AddAttraction.new.call(val_req)
             if add_result.failure?
               flash[:error] = add_result.failure
               routing.halt 500
             end
-
-            selected_attraction = add_result.value!
-            session[:cart].push(selected_attraction.place_id).uniq!
-
-            Views::Attraction.new(selected_attraction).to_json
+            attraction = add_result.value!
+            session[:cart].push(attraction.place_id).uniq!
+            Views::Attraction.new(attraction).to_json
           end
 
           # DELETE /attractions
@@ -106,7 +95,6 @@ module TravelRoute
               flash[:error] = req.failure
               routing.redirect '/plans'
             end
-
             cart = req.value!
             cart_item = Views::AttractionList.new(cart).attractions
             view 'adjustment', locals: { cart: cart_item }

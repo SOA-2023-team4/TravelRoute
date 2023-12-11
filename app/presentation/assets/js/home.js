@@ -1,7 +1,7 @@
 function addAttraction(element) {
   const xhr = new XMLHttpRequest();
   xhr.open("POST", "/attractions", true)
-  xhr.send(JSON.stringify({"selected": element}));
+  xhr.send(JSON.stringify({"selected_attraction": element}));
 
   xhr.onload = () => {
     let attraction = JSON.parse(xhr.response);

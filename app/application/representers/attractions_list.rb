@@ -9,8 +9,7 @@ module TravelRoute
     class AttractionsList < Roar::Decorator
       include Roar::JSON
 
-      collection :attractions, extend: Representer::Attraction,
-                               class: Struct
+      collection :attractions, extend: Representer::Attraction, class: OpenStruct
     end
   end
 end
