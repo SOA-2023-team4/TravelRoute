@@ -31,19 +31,19 @@ namespace :spec do
   end
 end
 
-desc 'Keep rerunning tests upon changes'
-task :respec do
-  sh "rerun -c 'rake spec' --ignore 'coverage/*'"
-end
+desc 'Run the application (default: development mode)'
+task run: ['run:dev']
 
-desc 'Run web app'
-task :run do
-  sh 'bundle exec puma'
-end
+namespace :run do
+  desc 'Run the application in development mode'
+  task :dev do
+    sh 'bundle exec puma'
+  end
 
-desc 'Keep rerunning web app upon changes'
-task :rerun do
-  sh "rerun -c --ignore 'coverage/*' -- bundle exec puma"
+  desc 'Run the application in test mode'
+  task :test do
+    sh 'bundle exec puma -p 9000'
+  end
 end
 
 desc 'Generates a 64 by secret for Rack::Session'
