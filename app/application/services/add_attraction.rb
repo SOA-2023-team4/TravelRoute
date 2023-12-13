@@ -8,26 +8,35 @@ module TravelRoute
     class AddAttraction
       include Dry::Transaction
 
-      step :make_entity
-      step :save_to_db
+      step :validate_input
+      step :select_attraction
+      step :reify_attraction
 
       private
 
-      def make_entity(input)
-        attraction = Entity::Attraction.new(input)
-
-        Success(attraction)
-      rescue StandardError
-        Failure('Could not create attraction')
+      def validate_input(input)
+        if input.success?
+          attraction = JSON.parse(input[:selected_attraction])
+          place_id = attraction['place_id']
+          Success(place_id:)
+        else
+          Failure("Form input failure #{input.errors.values.join('; ')}")
+        end
       end
 
-      def save_to_db(input)
-        selected = Repository::Attractions.update_or_create(input)
+      def select_attraction(input)
+        result = Gateway::Api.new(TravelRoute::App.config).add_attraction(input[:place_id])
+        result.success? ? Success(result.payload) : Failure(result.message)
+      rescue StandardError
+        Failure('Could not connect to Travel Route API or place_id doesnt exist')
+      end
 
-        Success(selected)
-      rescue StandardError => e
-        App.logger.error e.backtrace.join("\n")
-        Failure('Could not save attraction to database')
+      def reify_attraction(attraction_json)
+        Representer::Attraction.new(OpenStruct.new)
+          .from_json(attraction_json)
+          .then { |attraction| Success(attraction) }
+      rescue StandardError
+        Failure('Error in Attraction')
       end
     end
   end

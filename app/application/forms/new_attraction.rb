@@ -7,11 +7,11 @@ module TravelRoute
     # Form validation for selected attraction
     class NewAttraction < Dry::Validation::Contract
       params do
-        required(:selected).filled(:string)
+        required(:selected_attraction).filled(:string)
       end
 
       rules do
-        key.failure('No attraction selected') if value[:selected].empty?
+        key.failure('No attraction selected') if value[:selected_attraction].empty?
       end
     end
   end

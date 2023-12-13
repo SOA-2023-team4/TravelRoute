@@ -37,12 +37,12 @@ task run: ['run:dev']
 namespace :run do
   desc 'Run the application in development mode'
   task :dev do
-    sh "rerun -c --ignore 'coverage/*' --ignore 'repostore/*' -- bundle exec puma"
+    sh 'bundle exec puma'
   end
 
   desc 'Run the application in test mode'
   task :test do
-    sh "rerun -c --ignore 'coverage/*' --ignore 'repostore/*' -- bundle exec puma -p 9000"
+    sh 'bundle exec puma -p 9000'
   end
 end
 

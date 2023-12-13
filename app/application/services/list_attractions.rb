@@ -6,16 +6,28 @@ module TravelRoute
   module Service
     # Retrieves array of all listed attraction entities
     class ListAttractions
-      include Dry::Monads::Result::Mixin
+      include Dry::Transaction
 
-      def call(places_id)
-        attractions = places_id.map do |place_id|
-          Repository::Attractions.find_id(place_id)
+      step :lookup_call
+      step :reify_attractions
+
+      def lookup_call(input)
+        place_ids = input[:cart]
+        place_ids.map do |place_id|
+          result = Gateway::Api.new(TravelRoute::App.config).add_attraction(place_id)
+          result.success? ? Success(result.payload) : Failure(result.message)
         end
+      rescue StandardError
+        Failure('Could not connect to Travel Route API or place_id doesnt exist')
+      end
 
+      def reify_attractions(results)
+        attractions = results.map do |attraction_json|
+          Representer::Attractions.new(OpenStruct.new).from_json(attraction_json)
+        end
         Success(attractions)
       rescue StandardError
-        Failure('Cannot access database')
+        Failure('Error in parsing Attraction')
       end
     end
   end
