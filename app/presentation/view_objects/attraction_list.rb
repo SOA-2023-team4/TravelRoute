@@ -18,5 +18,9 @@ module Views
         attractions:
       }.to_json(options)
     end
+
+    def to_map_pins
+      @attractions.map(&:to_map_pin)
+    end
   end
 end
