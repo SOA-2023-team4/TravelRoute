@@ -5,15 +5,25 @@ html
 
     / Bootstrap CSS and theme (United Theme)
     link{
-      href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.2/dist/minty/bootstrap.min.css"
+      href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.0/dist/minty/bootstrap.min.css"
       rel="stylesheet" 
       crossorigin="anonymous"
+    }
+    link{
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/FortAwesome/Font-Awesome@5.15.3/css/all.min.css"
     }
 
     / Custom CSS
     / link rel='stylesheet' href='/presentation/assets/css/style.css'
     == assets(:css)
   body
+    javascript id="gmaps-script":
+      (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+        key: "#{session[:key]}",
+        v: "weekly",
+      });
+
     / Popper
     script{ 
       src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
@@ -62,13 +72,16 @@ html
                           button type="button" class="btn btn-danger" onclick="removeSavedPlan(this)" Delete
                       .col-6
                         a.btn.btn-primary href="/plans/#{plan.name}" View
+  
+    section
+      div.row
+        div.col-sm-1
+        div.col-sm-10
+          include :flash_bar
+          == yield
 
-      section
-        include :flash_bar
-        == yield
-
+    .container
       footer
         = "ShowDaPlan is made for demonstration purposes. We cannot warrant full correctness of all content. ShowDaPlan may use cookies for sessions but does not track users."
 
-      
-      == assets([:js, :home])
+    == assets([:js, :utils])
