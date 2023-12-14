@@ -16,8 +16,7 @@ module TravelRoute
 
       def validate_input(input)
         if input.success?
-          attraction = JSON.parse(input[:selected_attraction])
-          place_id = attraction['place_id']
+          place_id = input[:selected_attraction]
           Success(place_id:)
         else
           Failure("Form input failure #{input.errors.values.join('; ')}")
