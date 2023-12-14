@@ -23,7 +23,6 @@ module TravelRoute
         @request.add_attraction(place_id)
       end
 
-
       # HTTP Request
       class Request
         API_ROOT_ENDPOINT = '/api/v1'
