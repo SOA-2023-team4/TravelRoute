@@ -15,9 +15,12 @@ module TravelRoute
     plugin :assets, path: 'app/presentation/assets', group_subdirs: false,
                     css: 'style.css',
                     js: {
+                      utils: ['utils.js'],
                       home: ['home.js'],
-                      plan: ['plan.js']
+                      plan: ['plan.js'],
+                      map: ['map.js']
                     }
+    plugin :request_headers
     plugin :common_logger, $stderr
 
     # use Rack::MethodOverride
@@ -25,12 +28,12 @@ module TravelRoute
     route do |routing|
       routing.assets
       response['Content-Type'] = 'text/html; charset=utf-8'
+      session[:key] = App.config.GMAP_TOKEN
 
       # GET /
       routing.root do
-        session[:cart] ||= []
-        session[:saved] ||= {}
-        list_result = Service::ListAttractions.new.call(session[:cart])
+        session[:cart] ||= {}
+        list_result = Service::ListAttractions.new.call(cart: session[:cart])
 
         if list_result.failure?
           flash[:error] = list_result.failure
@@ -43,64 +46,75 @@ module TravelRoute
         view 'home', locals: { cart: cart_item }
       end
 
-      routing.on 'search' do
-        # POST /search
-        routing.is do
-          routing.post do
-            req = JSON.parse(routing.body.read, symbolize_names: true)
-            search_req = Forms::SearchAttraction.new.call(req)
-            search_result = Service::SearchAttractions.new.call(search_req)
-            if search_result.failure?
-              flash[:error] = search_result.failure
-              routing.halt 500
-            end
-            Views::AttractionList.new(search_result.value!.attractions).to_json
-          end
-        end
-      end
-
-      routing.on 'attractions' do
-        routing.is do
-          # POST /attractions
-          routing.post do
-            req = JSON.parse(routing.body.read, symbolize_names: true)
-            val_req = Forms::NewAttraction.new.call(req)
+      routing.on 'carts' do
+        response['Content-Type'] = 'application/json'
+        # GET /carts/:place_id
+        routing.on String do |place_id|
+          routing.get do
+            session[:cart] ||= {}
+            val_req = Forms::NewAttraction.new.call(selected_attraction: place_id)
             add_result = Service::AddAttraction.new.call(val_req)
             if add_result.failure?
               flash[:error] = add_result.failure
               routing.halt 500
             end
             attraction = add_result.value!
-            session[:cart].push(attraction.place_id).uniq!
-            Views::Attraction.new(attraction).to_json
+            attraction_view = Views::Attraction.new(attraction)
+            session[:cart].merge!(attraction_view.to_map_pin)
+            attraction_view.to_json
           end
 
-          # DELETE /attractions
+          # DELETE /carts/:place_id
           routing.delete do
-            req = JSON.parse(routing.body.read, symbolize_names: true)
-            removed = req[:removed]
-            removed == 'all' ? session[:cart].clear : session[:cart].delete(removed)
-            { removed: }.to_json
+            removed = session[:cart].delete(place_id.to_sym)
+            removed.to_json
           end
         end
-      end
 
-      routing.on 'adjustment' do
         routing.is do
-          # GET /adjustment
+          # GET /carts or /carts?format=pins
           routing.get do
-            req = Service::ListAttractions.new.call(session[:cart])
+            session[:cart] ||= {}
+            return session[:cart].values.to_json if routing.params['format'] == 'pins'
 
-            if req.failure?
-              flash[:error] = req.failure
-              routing.redirect '/plans'
-            end
-            cart = req.value!
-            cart_item = Views::AttractionList.new(cart).attractions
-            view 'adjustment', locals: { cart: cart_item }
+            session[:cart].keys.to_json
           end
         end
       end
+
+      routing.on 'attractions' do
+        response['Content-Type'] = 'application/json'
+        routing.is do
+          # Get /attractions?search_term=
+          routing.get do
+            search_req = Forms::SearchAttraction.new.call(routing.params)
+            search_result = Service::SearchAttractions.new.call(search_req)
+            if search_result.failure?
+              flash[:error] = search_result.failure
+              routing.halt 500
+            end
+
+            Views::AttractionList.new(search_result.value!.attractions).to_json
+          end
+        end
+      end
+
+      # routing.on 'adjustment' do
+      #   routing.is do
+      #     # GET /adjustment
+      #     routing.get do
+      #       req = Service::ListAttractions.new.call(session[:cart])
+
+      #       if req.failure?
+      #         flash[:error] = req.failure
+      #         routing.redirect '/plans'
+      #       end
+      #       cart = req.value!
+      #       cart_item = Views::AttractionList.new(cart).attractions
+      #       view 'adjustment', locals: { cart: cart_item }
+      #     end
+      #   end
+      # end
 
       routing.on 'plans' do
         # GET /plans/:plan_name
