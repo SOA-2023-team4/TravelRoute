@@ -1,44 +1,69 @@
-function addAttraction(element) {
+// make api call to /carts to retrive cart
+function getCart() {
   const xhr = new XMLHttpRequest();
-  xhr.open("POST", "/attractions", true)
-  xhr.send(JSON.stringify({"selected_attraction": element}));
+  xhr.open("GET", "/carts", false);
+  xhr.send();
+
+  return JSON.parse(xhr.response);
+}
+
+function addAttraction(element) {
+  const cart = getCart();
+  const xhr = new XMLHttpRequest();
+  url = "/carts/" + element.id;
+  xhr.open("GET", url, true)
+  xhr.send();
 
   xhr.onload = () => {
     let attraction = JSON.parse(xhr.response);
-    let attraction_list = document.querySelector("#attraction-list");
+    if (!cart.includes(attraction['place_id'])) {
+      let attraction_list = document.querySelector("#attraction-list-body");
 
-    var chosen_attraction = document.createElement("li");
-    chosen_attraction.setAttribute("class", "list-group-item");
+      var chosen_attraction = document.createElement("li");
+      chosen_attraction.setAttribute("class", "list-group-item");
 
-    var chosen_attraction_card_body = document.createElement("div");
-    chosen_attraction_card_body.setAttribute("class", "card-body");
+      var chosen_attraction_card_body = document.createElement("div");
+      chosen_attraction_card_body.setAttribute("class", "card-body");
 
-    var chosen_attraction_card_title = document.createElement("h5");
-    chosen_attraction_card_title.setAttribute("class", "card-title");
-    chosen_attraction_card_title.innerHTML = attraction["name"] + " (" + attraction["rating"] + ")";
-    var chosen_attraction_card_text = document.createElement("p");
-    chosen_attraction_card_text.setAttribute("class", "card-text");
-    chosen_attraction_card_text.innerHTML = attraction["address"];
-    var remove_button = document.createElement("button");
-    remove_button.setAttribute("class", "btn btn-danger btn-small");
-    remove_button.setAttribute("onclick", "removeAttraction('" + attraction["place_id"] + "', this)");
-    remove_button.innerHTML = "-";
+      var row = createRow();
+      var col_11 = createCol(11);
+      var col_1 = createCol(1);
 
-    chosen_attraction_card_body.appendChild(chosen_attraction_card_title);
-    chosen_attraction_card_body.appendChild(chosen_attraction_card_text);
-    chosen_attraction_card_body.appendChild(remove_button);
-    chosen_attraction.appendChild(chosen_attraction_card_body);
-    attraction_list.appendChild(chosen_attraction);
+      var chosen_attraction_card_title = createHeader(5, "card-title", attraction["name"]);
+      var chosen_attraction_rating = createRating(attraction["rating"]);
+
+      var chosen_attraction_card_text = createParagraph("card-text", attraction["address"]);
+
+      var remove_button = createDeleteButton();
+      remove_button.setAttribute("id", attraction["place_id"]);
+      remove_button.setAttribute("onclick", "removeAttraction(this)");
+
+
+      col_11.appendChild(chosen_attraction_card_title);
+      col_11.appendChild(chosen_attraction_rating);
+      col_11.appendChild(chosen_attraction_card_text);
+      col_1.appendChild(remove_button);
+      row.appendChild(col_11);
+      row.appendChild(col_1);
+      chosen_attraction_card_body.appendChild(row);
+      chosen_attraction.appendChild(chosen_attraction_card_body);
+      attraction_list.appendChild(chosen_attraction);
+
+      pin = {"position": {"lat": attraction["latitude"], "lng": attraction["longitude"]}, "title": attraction["name"]}
+      setPin(pin['position'], pin['title']);
+    }
   }
 }
 
-function removeAttraction(place_id, element) {
+function removeAttraction(element) {
   const xhr = new XMLHttpRequest();
-  xhr.open("DELETE", "/attractions", true)
-  xhr.send(JSON.stringify({"removed": place_id}));
+  xhr.open("DELETE", "/carts/" + element.id, true)
+  xhr.send();
 
   xhr.onload = () => {
-    element.parentElement.parentElement.remove();
+    element.parentElement.parentElement.parentElement.parentElement.remove();
+    del_pin = JSON.parse(xhr.response);
+    removePin(del_pin);
   }
 }
 
@@ -54,62 +79,57 @@ function removeSavedPlan(element) {
 }
 
 let clear_button = document.querySelector("#clear-attraction-list-button");
-let searchForm = document.querySelector("#attraction-search-form");
 let searchButton = document.querySelector("#attraction-search-button");
 let searchResults = document.querySelector("#attraction-search-results");
+let searchTerm = document.querySelector("#attraction-search-term");
 
-searchButton.addEventListener("click", () => {
+function showSearchResults() {
+  searchResults.style.display = "block";
+}
+
+searchTerm.addEventListener("click", () => {
+  showSearchResults()
+});
+
+searchButton.addEventListener("click", (event) => {
+  event.preventDefault();
   searchResults.innerHTML='';
-  search_term = document.querySelector("#attraction-search-term").value;
-  url = searchForm.action;
+  search_term = searchTerm.value;
+  url = "/attractions?search_term=" + search_term;
   let xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
-  xhr.send(JSON.stringify({"search_term": search_term}));
+  xhr.open("GET", url, true);
+  xhr.send();
 
   xhr.onload = () => {
     if (xhr.status == 200) {
       res = JSON.parse(xhr.response);
       var attractions = res["attractions"];
       attractions.forEach((attraction) => {
-        var attraction_list = document.createElement("li");
-        attraction_list.setAttribute("class", "list-group-item");
+        var a = createLink("list-group-item list-group-item-action flex-column align-items-start")
+        a.setAttribute("id", attraction["place_id"]);
+        a.setAttribute("onclick", "addAttraction(this)");
 
-        var attraction_card = document.createElement("div");
-        attraction_card.setAttribute("class", "card border-light mb-3");
+        var header_div = createDiv("d-flex w-100 justify-content-between");
+        var result_title = createHeader(5, "mb-1", attraction["name"]);
+        var rating = createRating(attraction["rating"]);
+        var content = createParagraph("mb-1", attraction["address"]);
 
-        var attraction_card_body = document.createElement("div");
-        attraction_card_body.setAttribute("class", "card-body");
-        var attraction_card_title = document.createElement("h5");
-        attraction_card_title.setAttribute("class", "card-title");
-        attraction_card_title.innerHTML = attraction["name"] + " (" + attraction["rating"] + ")";
-        var attraction_card_text = document.createElement("p");
-        attraction_card_text.setAttribute("class", "card-text");
-        attraction_card_text.innerHTML = attraction["address"]; 
-
-        var add_button = document.createElement("a");
-        add_button.setAttribute("class", "btn btn-success btn-small");
-        add_button.setAttribute("onclick", "addAttraction('" + JSON.stringify(attraction) + "')");
-        add_button.innerHTML = "+";
-
-        attraction_card_body.appendChild(attraction_card_title);
-        attraction_card_body.appendChild(attraction_card_text);
-        attraction_card_body.appendChild(add_button);
-        attraction_card.appendChild(attraction_card_body);
-        attraction_list.appendChild(attraction_card);
-        searchResults.appendChild(attraction_list);
+        header_div.appendChild(result_title);
+        header_div.appendChild(rating);
+        a.appendChild(header_div);
+        a.appendChild(content);
+        searchResults.appendChild(a);
       });
+
+      showSearchResults()
     } else {
       window.location.href = '/';
     }
   }
 });
 
-clear_button.addEventListener("click", () => {
-  let attraction_list = document.querySelector("#attraction-list");
-  const xhr = new XMLHttpRequest();
-  xhr.open("DELETE", "/attractions", true)
-  xhr.send(JSON.stringify({"removed": "all"}));
-  xhr.onload = () => {
-    window.location.reload();
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('#attraction-search-form')) {
+    searchResults.style.display = 'none';
   }
 });
