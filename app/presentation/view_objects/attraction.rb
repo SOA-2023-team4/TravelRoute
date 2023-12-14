@@ -38,6 +38,14 @@ module Views
       @attraction.opening_hours
     end
 
+    def latitude
+      @attraction.location['latitude']
+    end
+
+    def longitude
+      @attraction.location['longitude']
+    end
+
     def to_json(options = {})
       {
         place_id:,
@@ -45,8 +53,17 @@ module Views
         address:,
         rating:,
         type:,
-        opening_hours:
+        opening_hours:,
+        latitude:,
+        longitude:
       }.to_json(options)
+    end
+
+    def to_map_pin
+      { place_id.to_sym => {
+        position: { lat: latitude, lng: longitude },
+        title: name
+      } }
     end
   end
 end
