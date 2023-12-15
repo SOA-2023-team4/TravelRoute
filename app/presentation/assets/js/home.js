@@ -7,6 +7,33 @@ function getCart() {
   return JSON.parse(xhr.response);
 }
 
+function resetOrigin() {
+  const all_attraction_list = document.querySelectorAll("#attraction-list-body input");
+  all_attraction_list.forEach((attraction) => {
+    attraction.removeAttribute("checked");
+    attraction.parentElement.parentElement.classList.remove("list-group-item-info");
+  });
+  const badge = document.querySelector(".origin-badge");
+  if (badge) {
+    badge.remove();
+  }
+}
+
+function selectOrigin(element) {
+  resetOrigin();
+
+  element.setAttribute("checked", "");
+  element.parentElement.parentElement.classList.add("list-group-item-info");
+  
+  const label = element.parentElement.parentElement.querySelector("label");
+  const span = document.createElement("span");
+  span.setAttribute("class", "badge bg-primary rounded-pill origin-badge");
+  span.innerHTML = "ORIGIN";
+  label.appendChild(span);
+
+  console.log(label);
+}
+
 function addAttraction(element) {
   const cart = getCart();
   const xhr = new XMLHttpRequest();

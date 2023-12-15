@@ -14,19 +14,20 @@
         .card.border-light.mb-3 id="attraction-list"
           .card-header
             h4.card-title Attraction List
-          .scrollable id="attraction-list-body"
+          fieldset.scrollable.form-group id="attraction-list-body"
             - cart.each do |attraction|
-              li class="list-group-item"
-                  .card-body
-                    .row
-                      .col-11
+              li class="list-group-item list-group-item-action flex-column align-items-start"
+                .card-body.form-check
+                  input class="form-check-input" type="radio" name="origin" id="#{attraction.place_id}" value="#{attraction.place_id}" onclick="selectOrigin(this)"
+                  .row
+                    .col-11
+                      label class="form-check-label" for="#{attraction.place_id}"
                         h5.card-title #{attraction.name}
                         i class="fas fa-star"
                         small class="text-muted" #{attraction.rating}
                         p.card-text #{attraction.address}
-                        input type="hidden" name="attractions[]" value="#{attraction.place_id}"
-                      .col-1
-                        a type="button" id="#{attraction.place_id}" class="btn btn-secondary btn-lg fas fa-trash" onclick="removeAttraction(this)"
+                    .col-1
+                      a type="button" id="#{attraction.place_id}" class="btn btn-secondary btn-lg fas fa-trash" onclick="removeAttraction(this)"
       .d-grid.gap-2
         button type="button" class="btn btn-lg btn-info" Generate Plan
 
