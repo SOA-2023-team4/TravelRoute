@@ -7,7 +7,7 @@ require 'slim/include'
 # The core class of the web app for TravelRoute
 module TravelRoute
   # Web App
-  class App < Roda # rubocop:disable Metrics/ClassLength
+  class App < Roda
     plugin :halt
     plugin :flash
     plugin :all_verbs
@@ -99,34 +99,9 @@ module TravelRoute
         end
       end
 
-      # routing.on 'adjustment' do
-      #   routing.is do
-      #     # GET /adjustment
-      #     routing.get do
-      #       req = Service::ListAttractions.new.call(session[:cart])
-
-      #       if req.failure?
-      #         flash[:error] = req.failure
-      #         routing.redirect '/plans'
-      #       end
-      #       cart = req.value!
-      #       cart_item = Views::AttractionList.new(cart).attractions
-      #       view 'adjustment', locals: { cart: cart_item }
-      #     end
-      #   end
-      # end
-
       routing.on 'plans' do
-        # GET /plans/:plan_name
-        routing.on String do |plan_name|
-          routing.get do
-            plan = session[:saved][plan_name]
-            view 'plan', locals: { plan: }
-          end
-        end
-
         routing.is do
-          # GET /plans
+          # GET /plans?origin=
           routing.get do
             origin_id = routing.params['origin']
             place_ids = session[:cart]
@@ -140,38 +115,6 @@ module TravelRoute
             plan = Views::Plan.new(plan_req.value!)
             session[:temp_plan] = plan
             view 'plan', locals: { plan: }
-          end
-
-          # POST /plans
-          routing.post do
-            plan = session[:temp_plan].plan
-            save_req = Forms::SavePlan.new.call(routing.params)
-
-            if save_req.failure?
-              flash[:error] = save_req.errors.messages.join('; ')
-              routing.redirect '/plans'
-            end
-
-            plan_name = save_req[:plan_name]
-            saved = plan_name.nil? ? Views::Plan.new(plan) : Views::Plan.new(plan, plan_name)
-            session[:saved].merge!(saved.name => saved)
-            flash[:notice] = 'Plan saved'
-            routing.redirect "/plans?origin=#{saved.origin.place_id}"
-          end
-
-          # DELETE /plans
-          routing.delete do
-            req = JSON.parse(routing.body.read, symbolize_names: true)
-            del_req = Forms::DeletePlan.new.call(req)
-
-            if del_req.failure?
-              flash[:error] = del_req.errors.messages.join('; ')
-              routing.redirect '/plans'
-            end
-
-            deleted = del_req[:plan_name]
-            session[:saved].delete(deleted)
-            { success: true }.to_json
           end
         end
       end
