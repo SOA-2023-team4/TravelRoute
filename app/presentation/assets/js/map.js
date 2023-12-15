@@ -1,32 +1,5 @@
-const gmaps_script = document.getElementById("gmaps-script");
-gmaps_script.remove();
-
-const ZOOM_LEVEL = 15;
-const CENTER = { lat: 24.7961217, lng: 120.9966699 }; // NTHU
-
-function getPins() {
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", "/carts?format=pins", false);
-  xhr.send();
-
-  return JSON.parse(xhr.response);
-}
-
-var map;
-var markers = [];
-async function initMap() {
-  // Request needed libraries.
-  const { Map } = await google.maps.importLibrary("maps");
-  map = new Map(document.getElementById("map"), {
-    zoom: ZOOM_LEVEL,
-    center: CENTER,
-    mapId: "4504f8b37365c3d0",
-  });
-  // Set LatLng and title text for the markers. The first marker (Boynton Pass)
-  // receives the initial focus when tab is pressed. Use arrow keys to
-  // move between markers; press tab again to cycle through the map controls.
-
-  const tourStops = getPins();
+function setAllPins() {
+  const tourStops = getAllPins();
   // Create the markers.
   tourStops.forEach(({ position, title }) => {
     setPin(position, title);
@@ -52,7 +25,7 @@ async function setPin(position, title) {
 
   markers.push(marker);
   if  (markers.length > 1) {
-    boundMarkers();
+    boundMarkers(markers);
   } else {
     map.setCenter(position);
     map.setZoom(ZOOM_LEVEL);
@@ -65,14 +38,6 @@ async function setPin(position, title) {
     infoWindow.setContent(marker.title);
     infoWindow.open(marker.map, marker);
   });
-}
-
-function boundMarkers() {
-  const bounds = new google.maps.LatLngBounds();
-  markers.forEach(marker => {
-    bounds.extend(marker.position);
-  });
-  map.fitBounds(bounds);
 }
 
 function removePin(obj){
@@ -88,3 +53,4 @@ function removePin(obj){
 }
 
 initMap();
+setAllPins();
