@@ -36,6 +36,9 @@ html
       crossorigin="anonymous"
     }
 
+    == assets([:js, :utils])
+
+
     nav.navbar.navbar-expand-lg.bg-light.sticky-top data-bs-theme="light"
       .container-fluid
         h1
@@ -83,5 +86,3 @@ html
     .container
       footer
         = "ShowDaPlan is made for demonstration purposes. We cannot warrant full correctness of all content. ShowDaPlan may use cookies for sessions but does not track users."
-
-    == assets([:js, :utils])
