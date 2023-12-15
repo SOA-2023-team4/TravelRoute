@@ -17,8 +17,8 @@
           fieldset.scrollable.form-group id="attraction-list-body"
             - cart.each do |attraction|
               li class="list-group-item list-group-item-action flex-column align-items-start"
-                .card-body.form-check
-                  input class="form-check-input" type="radio" name="origin" id="#{attraction.place_id}" value="#{attraction.place_id}" onclick="selectOrigin(this)"
+                .card-body.form-check onclick="selectOrigin(this)"
+                  input class="form-check-input" type="radio" name="origin" id="#{attraction.place_id}" value="#{attraction.place_id}"
                   .row
                     .col-11
                       label class="form-check-label" for="#{attraction.place_id}"
@@ -29,7 +29,7 @@
                     .col-1
                       a type="button" id="#{attraction.place_id}" class="btn btn-secondary btn-lg fas fa-trash" onclick="removeAttraction(this)"
       .d-grid.gap-2
-        button type="button" class="btn btn-lg btn-info" Generate Plan
+        a type="button" class="btn btn-lg btn-info" id="generate-plan-link" Generate Plan
 
-== assets([:js, :home])
 == assets([:js, :map])
+== assets([:js, :home])
