@@ -8,32 +8,41 @@ module TravelRoute
     class GeneratePlan
       include Dry::Transaction
 
+      step :validate_input
       step :make_entity
-      step :generate_guidebook
-      step :create_plan
+      step :get_plan
+      step :reify_plan
 
       private
 
+      def validate_input(input)
+        if input[:origin].success?
+          origin = input[:origin][:origin]
+          Success(input.merge(origin:))
+        else
+          Failure(input.errors.values.join('; '))
+        end
+      end
+
       def make_entity(input)
-        cart = ListAttractions.new.call(input[:cart]).value!
+        cart = ListAttractions.new.call(cart: input[:cart]).value!
         origin = cart.find { |attraction| attraction.place_id == input[:origin] }
         Success(cart:, origin:)
       end
 
-      def generate_guidebook(input)
-        guidebook = Mapper::GuidebookMapper.new(App.config.GMAP_TOKEN).generate_guidebook(input[:cart])
+      def get_plan(input)
+        plan = Gateway::Api.new(App.config).get_plan(origin: input[:origin], attractions: input[:cart])
 
-        Success(guidebook:, origin: input[:origin])
+        Success(plan)
       rescue StandardError
         Failure('Could not generate guidebook')
       end
 
-      def create_plan(input)
-        plan = Entity::Planner.new(input[:guidebook]).generate_plan(input[:origin])
-
+      def reify_plan(results)
+        plan = Representer::Plan.new(OpenStruct.new).from_json(results.payload)
         Success(plan)
       rescue StandardError
-        Failure('Could not create plan')
+        Failure('Error in parsing Attraction')
       end
     end
   end
