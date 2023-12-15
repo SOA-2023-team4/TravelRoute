@@ -1,3 +1,40 @@
+const gmaps_script = document.getElementById("gmaps-script");
+gmaps_script.remove();
+
+const ZOOM_LEVEL = 15;
+const CENTER = { lat: 24.7961217, lng: 120.9966699 }; // NTHU
+var map;
+var markers = [];
+
+function getAllPins() {
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", "/carts?format=pins", false);
+  xhr.send();
+
+  return JSON.parse(xhr.response);
+}
+
+async function initMap() {
+  // Request needed libraries.
+  const { Map } = await google.maps.importLibrary("maps");
+  map = new Map(document.getElementById("map"), {
+    zoom: ZOOM_LEVEL,
+    center: CENTER,
+    mapId: "4504f8b37365c3d0",
+  });
+  // Set LatLng and title text for the markers. The first marker (Boynton Pass)
+  // receives the initial focus when tab is pressed. Use arrow keys to
+  // move between markers; press tab again to cycle through the map controls.
+}
+
+function boundMarkers(markers) {
+  const bounds = new google.maps.LatLngBounds();
+  markers.forEach(marker => {
+    bounds.extend(marker.position);
+  });
+  map.fitBounds(bounds);
+}
+
 function createDiv(className) {
   let div = document.createElement('div');
   div.setAttribute('class', className);
@@ -37,8 +74,28 @@ function createDeleteButton() {
   return remove_button;
 }
 
-function createInput(type, name) {
+function createLabel(labelFor) {
+  let label = document.createElement('label');
+  label.setAttribute('for', labelFor);
+  label.setAttribute('class', 'form-check-label');
+  return label;
+}
+
+function createRadioInput(name, id, value, onclick=null) {
+  let radio = createInput('radio', name, 'form-check-input', onclick);
+  radio.setAttribute('id', id);
+  radio.setAttribute('value', value);
+  return radio;
+}
+
+function createInput(type, name, className=null, onclick=null) {
   let input = document.createElement('input');
+  if (className) {
+    input.setAttribute('class', className);
+  }
+  if (onclick) {
+    input.setAttribute('onclick', onclick);
+  }
   input.setAttribute('type', type);
   input.setAttribute('name', name);
   return input;
