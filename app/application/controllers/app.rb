@@ -102,23 +102,6 @@ module TravelRoute
         end
       end
 
-      # routing.on 'adjustment' do
-      #   routing.is do
-      #     # GET /adjustment
-      #     routing.get do
-      #       req = Service::ListAttractions.new.call(session[:cart])
-
-      #       if req.failure?
-      #         flash[:error] = req.failure
-      #         routing.redirect '/plans'
-      #       end
-      #       cart = req.value!
-      #       cart_item = Views::AttractionList.new(cart).attractions
-      #       view 'adjustment', locals: { cart: cart_item }
-      #     end
-      #   end
-      # end
-
       routing.on 'plans' do
         routing.is do
           # GET /plans?origin=
