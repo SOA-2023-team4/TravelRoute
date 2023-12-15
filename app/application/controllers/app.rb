@@ -60,7 +60,7 @@ module TravelRoute
             end
             attraction = add_result.value!
             attraction_view = Views::Attraction.new(attraction)
-            session[:cart].merge!(attraction_view.to_map_pin)
+            session[:cart].merge!(attraction_view.place_id.to_sym => attraction_view.to_map_pin)
             attraction_view.to_json
           end
 
@@ -103,17 +103,17 @@ module TravelRoute
         routing.is do
           # GET /plans?origin=
           routing.get do
-            origin_id = routing.params['origin']
+            origin_id = Forms::GeneratePlan.new.call(routing.params)
             place_ids = session[:cart]
             plan_req = Service::GeneratePlan.new.call(cart: place_ids, origin: origin_id)
 
             if plan_req.failure?
               flash[:error] = plan_req.failure
-              routing.redirect "/plans?origin=#{origin_id}"
+              routing.redirect '/'
             end
 
-            plan = Views::Plan.new(plan_req.value!)
-            session[:temp_plan] = plan
+            plan = Views::Plan.new(plan_req)
+
             view 'plan', locals: { plan: }
           end
         end
