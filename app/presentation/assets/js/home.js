@@ -21,17 +21,19 @@ function resetOrigin() {
 
 function selectOrigin(element) {
   resetOrigin();
+  const input = element.querySelector('input');
 
-  element.setAttribute("checked", "");
-  element.parentElement.parentElement.classList.add("list-group-item-info");
+  input.setAttribute("checked", "");
+  element.parentElement.classList.add("list-group-item-info");
   
-  const label = element.parentElement.parentElement.querySelector("label");
+  const label = element.parentElement.querySelector("label");
   const span = document.createElement("span");
   span.setAttribute("class", "badge bg-primary rounded-pill origin-badge");
   span.innerHTML = "ORIGIN";
   label.appendChild(span);
 
-  console.log(label);
+  const generate_plan_link = document.querySelector("#generate-plan-link");
+  generate_plan_link.setAttribute("href", "/plans?origin=" + input.id);
 }
 
 function addAttraction(element) {
@@ -47,14 +49,17 @@ function addAttraction(element) {
       let attraction_list = document.querySelector("#attraction-list-body");
 
       var chosen_attraction = document.createElement("li");
-      chosen_attraction.setAttribute("class", "list-group-item");
+      chosen_attraction.setAttribute("class", "list-group-item list-group-item-action flex-column align-items-start");
 
-      var chosen_attraction_card_body = document.createElement("div");
-      chosen_attraction_card_body.setAttribute("class", "card-body");
+      var card_body = document.createElement("div");
+      card_body.setAttribute("class", "card-body form-check");
+
+      var radio = createRadioInput("origin", attraction["place_id"], attraction["place_id"]);
 
       var row = createRow();
       var col_11 = createCol(11);
       var col_1 = createCol(1);
+      var label = createLabel(attraction["place_id"]);
 
       var chosen_attraction_card_title = createHeader(5, "card-title", attraction["name"]);
       var chosen_attraction_rating = createRating(attraction["rating"]);
@@ -64,16 +69,18 @@ function addAttraction(element) {
       var remove_button = createDeleteButton();
       remove_button.setAttribute("id", attraction["place_id"]);
       remove_button.setAttribute("onclick", "removeAttraction(this)");
+      card_body.setAttribute("onclick", "selectOrigin(this)");
 
-
-      col_11.appendChild(chosen_attraction_card_title);
-      col_11.appendChild(chosen_attraction_rating);
-      col_11.appendChild(chosen_attraction_card_text);
+      label.appendChild(chosen_attraction_card_title);
+      label.appendChild(chosen_attraction_rating);
+      label.appendChild(chosen_attraction_card_text);
+      col_11.appendChild(label);
       col_1.appendChild(remove_button);
       row.appendChild(col_11);
       row.appendChild(col_1);
-      chosen_attraction_card_body.appendChild(row);
-      chosen_attraction.appendChild(chosen_attraction_card_body);
+      card_body.appendChild(radio);
+      card_body.appendChild(row);
+      chosen_attraction.appendChild(card_body);
       attraction_list.appendChild(chosen_attraction);
 
       pin = {"position": {"lat": attraction["latitude"], "lng": attraction["longitude"]}, "title": attraction["name"]}
