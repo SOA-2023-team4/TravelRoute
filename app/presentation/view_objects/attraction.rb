@@ -60,10 +60,10 @@ module Views
     end
 
     def to_map_pin
-      { place_id.to_sym => {
+      {
         position: { lat: latitude, lng: longitude },
         title: name
-      } }
+      }
     end
   end
 end

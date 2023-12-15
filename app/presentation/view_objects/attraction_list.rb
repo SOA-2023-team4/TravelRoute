@@ -20,7 +20,7 @@ module Views
     end
 
     def to_map_pins
-      @attractions.map(&:to_map_pin)
+      @attractions.map { |attraction| Views::Attraction.new(attraction).to_map_pin }
     end
   end
 end
