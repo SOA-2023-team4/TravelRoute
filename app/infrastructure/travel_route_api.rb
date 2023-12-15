@@ -23,6 +23,10 @@ module TravelRoute
         @request.add_attraction(place_id)
       end
 
+      def get_plan(origin:, attractions:)
+        @request.get_plan(origin:, attractions:)
+      end
+
       # HTTP Request
       class Request
         API_ROOT_ENDPOINT = '/api/v1'
@@ -49,8 +53,9 @@ module TravelRoute
           get(['recommendations', place_id])
         end
 
-        def get_plan(origin, attractions)
-          attraction_list = attractions.join(',')
+        def get_plan(origin:, attractions:)
+          origin = attractions.index(origin)
+          attraction_list = attractions.map(&:place_id).join(',')
           params = { origin:, attractions: CGI.escape(attraction_list) }
           get(['plans'], params:)
         end
