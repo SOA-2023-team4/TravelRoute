@@ -11,6 +11,7 @@ module TravelRoute
     plugin :halt
     plugin :flash
     plugin :all_verbs
+    plugin :caching
     plugin :render, engine: 'slim', views: 'app/presentation/views_html'
     plugin :assets, path: 'app/presentation/assets', group_subdirs: false,
                     css: 'style.css',
@@ -22,6 +23,8 @@ module TravelRoute
                     }
     plugin :request_headers
     plugin :common_logger, $stderr
+
+    CACHE_DURATION = 60 # seconds
 
     # use Rack::MethodOverride
 
@@ -113,6 +116,10 @@ module TravelRoute
             end
 
             plan = Views::Plan.new(plan_req)
+
+            App.configure :production do
+              response.expires CACHE_DURATION, public: true
+            end
 
             view 'plan', locals: { plan: }
           end
