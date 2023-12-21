@@ -34,10 +34,18 @@ function selectOrigin(element) {
 
   const generate_plan_link = document.querySelector("#generate-plan-link");
   generate_plan_link.setAttribute("href", "/plans?origin=" + input.id);
+  generate_plan_link.classList.remove("disabled");
+  generate_plan_link.classList.remove("btn-dark");
+  generate_plan_link.classList.add("btn-info");
 }
 
 function addAttraction(element) {
   const cart = getCart();
+  const key_list = Object.keys(cart);
+  const cart_values = Object.values(cart).map((attraction) => attraction['title']);
+  cart_values.push(element.name)
+  const to_exclude = cart_values.join(',');
+
   const xhr = new XMLHttpRequest();
   url = "/carts/" + element.id;
   xhr.open("GET", url, true)
@@ -45,7 +53,28 @@ function addAttraction(element) {
 
   xhr.onload = () => {
     let attraction = JSON.parse(xhr.response);
-    if (!cart.includes(attraction['place_id'])) {
+
+    let rec_req = new XMLHttpRequest();
+    console.log(attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(to_exclude)}`);
+    rec_req.open("GET", attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(to_exclude)}`, true)
+    rec_req.send();
+
+    rec_req.onreadystatechange = () => {
+      if (rec_req.readyState == 4 && rec_req.status == 200) {
+        reccommended_pin = [];
+        recommendations = JSON.parse(rec_req.response)['attractions'];
+        recommendations.forEach((rec) => {
+          reccommended_pin.push({
+            "position": {"lat": rec["location"]["latitude"], "lng": rec["location"]["longitude"]},
+            "title": rec["name"],
+            "info": createReccomendationInfo(rec)
+          });
+        });
+        setReccommendedMarker(reccommended_pin);
+      }
+    }
+
+    if (!key_list.includes(attraction['place_id'])) {
       let attraction_list = document.querySelector("#attraction-list-body");
 
       var chosen_attraction = document.createElement("li");
@@ -69,22 +98,22 @@ function addAttraction(element) {
       var remove_button = createDeleteButton();
       remove_button.setAttribute("id", attraction["place_id"]);
       remove_button.setAttribute("onclick", "removeAttraction(this)");
-      card_body.setAttribute("onclick", "selectOrigin(this)");
+      col_11.setAttribute("onclick", "selectOrigin(this)");
 
       label.appendChild(chosen_attraction_card_title);
       label.appendChild(chosen_attraction_rating);
       label.appendChild(chosen_attraction_card_text);
       col_11.appendChild(label);
+      col_11.appendChild(radio);
       col_1.appendChild(remove_button);
       row.appendChild(col_11);
       row.appendChild(col_1);
-      card_body.appendChild(radio);
       card_body.appendChild(row);
       chosen_attraction.appendChild(card_body);
       attraction_list.appendChild(chosen_attraction);
 
       pin = {"position": {"lat": attraction["latitude"], "lng": attraction["longitude"]}, "title": attraction["name"]}
-      setPin(pin['position'], pin['title']);
+      setNormalMarker(pin['position'], pin['title']);
     }
   }
 }
@@ -95,7 +124,17 @@ function removeAttraction(element) {
   xhr.send();
 
   xhr.onload = () => {
-    element.parentElement.parentElement.parentElement.parentElement.remove();
+    var generate_plan_button = document.querySelector("#generate-plan-link");
+    var card_list = element.parentElement.parentElement.parentElement.parentElement
+    var select = card_list.querySelector("input")
+    if (select.checked) {
+      generate_plan_button.setAttribute("href", "#");
+      generate_plan_button.classList.add("disabled");
+      generate_plan_button.classList.add("btn-dark");
+      generate_plan_button.classList.remove("btn-info");
+    }
+    console.log(select);
+    card_list.remove();
     del_pin = JSON.parse(xhr.response);
     removePin(del_pin);
   }
@@ -103,7 +142,6 @@ function removeAttraction(element) {
 
 function removeSavedPlan(element) {
   let form = element.parentElement;
-  console.log(form.plan_name.value);
   const xhr = new XMLHttpRequest();
   xhr.open("DELETE", "/plans", true)
   xhr.send(JSON.stringify({"plan_name": form.plan_name.value}));
@@ -141,6 +179,7 @@ searchButton.addEventListener("click", (event) => {
       attractions.forEach((attraction) => {
         var a = createLink("list-group-item list-group-item-action flex-column align-items-start")
         a.setAttribute("id", attraction["place_id"]);
+        a.setAttribute("name", attraction["name"]);
         a.setAttribute("onclick", "addAttraction(this)");
 
         var header_div = createDiv("d-flex w-100 justify-content-between");
