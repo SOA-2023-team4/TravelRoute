@@ -13,14 +13,17 @@
       ul class="list-group" id="attraction-cart"
         .card.border-light.mb-3 id="attraction-list"
           .card-header
-            h4.card-title Attraction List
+            h4.card-title 
+              | Attraction List 
+            span.text-danger
+              | (Please click on one of the attractions to set it as the origin before continue)               
           fieldset.scrollable.form-group id="attraction-list-body"
             - cart.each do |attraction|
               li class="list-group-item list-group-item-action flex-column align-items-start"
-                .card-body.form-check onclick="selectOrigin(this)"
-                  input class="form-check-input" type="radio" name="origin" id="#{attraction.place_id}" value="#{attraction.place_id}"
+                .card-body.form-check
                   .row
-                    .col-11
+                    .col-11 onclick="selectOrigin(this)"
+                      input class="form-check-input" type="radio" name="origin" id="#{attraction.place_id}" value="#{attraction.place_id}"
                       label class="form-check-label" for="#{attraction.place_id}"
                         h5.card-title #{attraction.name}
                         i class="fas fa-star"
@@ -29,7 +32,7 @@
                     .col-1
                       a type="button" id="#{attraction.place_id}" class="btn btn-secondary btn-lg fas fa-trash" onclick="removeAttraction(this)"
       .d-grid.gap-2
-        a type="button" class="btn btn-lg btn-info" id="generate-plan-link" Generate Plan
+        a type="button" class="btn btn-lg btn-dark disabled" id="generate-plan-link" Generate Plan
 
 == assets([:js, :map])
 == assets([:js, :home])

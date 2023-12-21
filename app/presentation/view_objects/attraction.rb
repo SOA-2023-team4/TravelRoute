@@ -46,7 +46,11 @@ module Views
       @attraction.location['longitude']
     end
 
-    def to_json(options = {})
+    def reccomendation_url
+      @attraction.links.find { |link| link['rel'] == 'self' }['href']
+    end
+
+    def to_json(options = {}) # rubocop:disable Metrics/MethodLength
       {
         place_id:,
         name:,
@@ -55,7 +59,8 @@ module Views
         type:,
         opening_hours:,
         latitude:,
-        longitude:
+        longitude:,
+        reccomendation_url:
       }.to_json(options)
     end
 

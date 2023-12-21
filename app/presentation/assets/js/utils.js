@@ -5,6 +5,7 @@ const ZOOM_LEVEL = 15;
 const CENTER = { lat: 24.7961217, lng: 120.9966699 }; // NTHU
 var map;
 var markers = [];
+var reccommended_markers = [];
 
 function getAllPins() {
   const xhr = new XMLHttpRequest();
@@ -122,4 +123,20 @@ function createRating(rating) {
   star.setAttribute('class', 'fas fa-star');
   ratingElement.insertBefore(star, ratingElement.firstChild);
   return ratingElement;
+}
+
+function createReccomendationInfo(rec) {
+  let info = createDiv('info');
+  let info_header = createHeader(5, 'card-title', rec['name']);
+  let info_rating = createRating(rec['rating']);
+  let info_text = createParagraph('card-text', rec['address']);
+  let info_button = createButton('btn btn-primary', 'Add to Plan');
+  info_button.setAttribute('id', rec['place_id']);
+  info_button.setAttribute('onclick', 'addAttraction(this)');
+  info_button.setAttribute('name', rec['name']);
+  info.appendChild(info_header);
+  info.appendChild(info_rating);
+  info.appendChild(info_text);
+  info.appendChild(info_button);
+  return info;
 }
