@@ -80,7 +80,7 @@ module TravelRoute
             session[:cart] ||= {}
             return session[:cart].values.to_json if routing.params['format'] == 'pins'
 
-            session[:cart].keys.to_json
+            session[:cart].to_json
           end
         end
       end
