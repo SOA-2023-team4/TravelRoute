@@ -1,47 +1,100 @@
 function getPlan(){
-  // const xhr = new XMLHttpRequest();
-  // url = window.location.href + "&format=pins";
-  // xhr.open("GET", url, false);
-  // xhr.send();
-  // return JSON.parse(xhr.response);
   pins = document.querySelector("#pins");
 
   return JSON.parse(pins.value);
 }
 
-async function setOrderedMarkers(){
-  const { InfoWindow } = await google.maps.importLibrary("maps");
-  const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary(
+function animateRoute(response) {
+  const route = response.routes[0].overview_path;
+
+  // Create a polyline
+  const animatedPolyline = new google.maps.Polyline({
+    path: [],
+    map: map,
+    strokeColor: '#FA8072',
+    strokeOpacity: 0.7,
+    strokeWeight: 5,
+  });
+
+  let count = 0;
+  const interval = window.setInterval(() => {
+    animatedPolyline.getPath().push(route[count]);
+    count++;
+
+    if (count === route.length) {
+      window.clearInterval(interval);
+    }
+  });
+}
+
+async function drawRoute() {
+  const { PinElement } = await google.maps.importLibrary(
     "marker",
   );
+  directionsService = new google.maps.DirectionsService();
+  directionsRenderer = new google.maps.DirectionsRenderer();
 
-  var stops = getPlan();
-  const infoWindow = new InfoWindow();
+  const plan = getPlan();
+  const planMarkers = [];
+  
+  // Create an array to store the markers
 
-  stops.forEach(({ position, title }, i) => {
-    const pin = new PinElement({
-      glyph: `${i + 1}`,
-      glyphColor: "white",
-    })
-
-    const marker = new AdvancedMarkerElement({
-      position,
-      map,
-      title: `${i + 1}. ${title}`,
-      content: pin.element,
+  directionsService
+  .route({
+    origin: plan[0].position,
+    destination: plan[plan.length - 1].position,
+    waypoints: plan.slice(1, plan.length - 1).map(({ position }) => {
+      return { location: position, stopover: true };
+  }),
+  optimizeWaypoints: false,
+  travelMode: "DRIVING",
+  })
+  .then((response) => {
+    directionsRenderer.setDirections(response);
+    directionsRenderer.setOptions({
+      suppressMarkers: true,
+      polylineOptions: {
+        strokeColor: "#FA8072",
+        strokeOpacity: 0.7,
+        strokeWeight: 5,
+      },
     });
+    // directionsRenderer.setMap(map);
 
-    boundMarkers(stops);
+    // Iterate over each leg of the route and add markers with animation
+    response.routes[0].legs.forEach(async (leg, i) => {
+      const glyph = new PinElement({
+        glyph: `${i + 1}`,
+        glyphColor: "white",
+      })
 
-    marker.addListener("click", ({ domEvent, latLng }) => {
-      const { target } = domEvent;
-      infoWindow.close();
-      infoWindow.setContent(marker.title);
-      infoWindow.open(marker.map, marker);
+      const marker_info = {'title': plan[i].title}
+      const marker = await createMarker(plan[i].position, marker_info, glyph);
+      const content = marker.content;
+      const time =  0.7 + i * 0.1;
+      addDropAnimation(content, time);
+      planMarkers.push(marker);
+
+      // Add the end marker
+      if ( i == plan.length - 2 ) {
+        const glyph = new PinElement({
+          glyph: `${plan.length}`,
+          glyphColor: "white",
+        })
+        const marker_info = {'title': plan[i + 1].title}
+        const last = await createMarker(plan[i + 1].position, marker_info, glyph);
+        const content = last.content;
+        const time =  0.7 + (i + 1) * 0.1;
+        addDropAnimation(content, time);
+        planMarkers.push(last);
+      }
+      boundMarkers(planMarkers);
+
+      // Animate the route
+      animateRoute(response);
     });
-
   });
 }
 
 initMap();
-setOrderedMarkers();
+drawRoute();
