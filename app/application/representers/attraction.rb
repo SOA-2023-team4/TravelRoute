@@ -14,6 +14,7 @@ module TravelRoute
 
       property :place_id
       property :name
+      property :description
       property :address
       property :type
       property :opening_hours

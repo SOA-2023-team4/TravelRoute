@@ -7,29 +7,8 @@ function setAllPins() {
 }
 
 async function setNormalMarker(position, title) {
-  const { InfoWindow } = await google.maps.importLibrary("maps");
-  const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary(
-    "marker",
-  );
-
-  // const bounds = new google.maps.LatLngBounds();
-  // Create an info window to share between markers.
-  const infoWindow = new InfoWindow();
-
-  // Create the markers.
-  const marker = new AdvancedMarkerElement({
-    position,
-    map,
-    title: title
-  });
-
-  marker.addListener("click", ({ domEvent, latLng }) => {
-    const { target } = domEvent;
-
-    infoWindow.close();
-    infoWindow.setContent(marker.title);
-    infoWindow.open(marker.map, marker);
-  });
+  const marker_info = {"title": title};
+  const marker = await createMarker(position, marker_info, title);
 
   markers.push(marker);
   if  (markers.length > 1) {
@@ -41,14 +20,12 @@ async function setNormalMarker(position, title) {
 }
 
 async function setReccommendedMarker(reccommended_pin) {
-  const { InfoWindow } = await google.maps.importLibrary("maps");
-  const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary(
+  const { PinElement } = await google.maps.importLibrary(
     "marker",
   );
-  const infoWindow = new InfoWindow();
   clearMarkers(reccommended_markers);
 
-  reccommended_pin.forEach(({ position, title, info }) => {
+  reccommended_pin.forEach(async ({ position, title, info }) => {
     const star = document.createElement("i");
     star.setAttribute("class", "fas fa-star");
     // Create the markers.
@@ -58,31 +35,13 @@ async function setReccommendedMarker(reccommended_pin) {
       glyph: star,
       glyphColor: "white"
     })
-  
-    const marker = new AdvancedMarkerElement({
-      position,
-      map,
-      title: title,
-      content: pin.element
-    });
 
+    const marker_info = {"title": title, "info": info};
+    const marker = await createMarker(position, marker_info, pin);
+
+    // drop animation
     const content = marker.content;
-    content.style.opacity = "0";
-    content.addEventListener("animationend", (event) => {
-      content.opacity = "1";
-    });
-
-    const time = 1;
-    content.style.setProperty("--delay-time", time + "s");
-    content.classList.add("drop");
-
-    marker.addListener("click", ({ domEvent, latLng }) => {
-      const { target } = domEvent;
-
-      infoWindow.close();
-      infoWindow.setContent(info);
-      infoWindow.open(marker.map, marker);
-    });
+    addDropAnimation(content);
     
     reccommended_markers.push(marker);
     all_markers = markers.concat(reccommended_markers);

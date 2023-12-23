@@ -22,6 +22,10 @@ module Views
       @attraction.name
     end
 
+    def description
+      @attraction.description
+    end
+
     def address
       @attraction.address
     end
@@ -54,6 +58,7 @@ module Views
       {
         place_id:,
         name:,
+        description:,
         address:,
         rating:,
         type:,

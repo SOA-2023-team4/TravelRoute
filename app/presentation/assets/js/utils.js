@@ -23,9 +23,6 @@ async function initMap() {
     center: CENTER,
     mapId: "4504f8b37365c3d0",
   });
-  // Set LatLng and title text for the markers. The first marker (Boynton Pass)
-  // receives the initial focus when tab is pressed. Use arrow keys to
-  // move between markers; press tab again to cycle through the map controls.
 }
 
 function boundMarkers(markers) {
@@ -129,7 +126,7 @@ function createReccomendationInfo(rec) {
   let info = createDiv('info');
   let info_header = createHeader(5, 'card-title', rec['name']);
   let info_rating = createRating(rec['rating']);
-  let info_text = createParagraph('card-text', rec['address']);
+  let info_text = createParagraph('card-text', rec['description']);
   let info_button = createButton('btn btn-primary', 'Add to Plan');
   info_button.setAttribute('id', rec['place_id']);
   info_button.setAttribute('onclick', 'addAttraction(this)');
@@ -139,4 +136,37 @@ function createReccomendationInfo(rec) {
   info.appendChild(info_text);
   info.appendChild(info_button);
   return info;
+}
+
+async function createMarker(position, marker_info, pin = null) {
+  const { InfoWindow } = await google.maps.importLibrary("maps");
+  const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary(
+    "marker",
+  );
+
+  const infoWindow = new InfoWindow();
+  const marker = new AdvancedMarkerElement({
+    position,
+    map,
+    title: marker_info['title'],
+    content: pin ? pin.element : pin,
+  });
+
+  marker.addListener("click", ({ domEvent, latLng }) => {
+    const { target } = domEvent;
+    infoWindow.close();
+    marker_info['info'] ? infoWindow.setContent(marker_info['info']) : infoWindow.setContent(marker_info['title']);
+    infoWindow.open(marker.map, marker);
+  });
+  return marker;
+}
+
+function addDropAnimation(element, time = 1) {
+  element.style.opacity = "0";
+  element.addEventListener("animationend", (event) => {
+    element.opacity = "1";
+  });
+
+  element.style.setProperty("--delay-time", time + "s");
+  element.classList.add("drop");
 }
