@@ -2,6 +2,7 @@
   .col-6
     h2 Search for Attractions
     div.progress id="progress-bar" style="display: none; height: 20px"
+      div.progress-bar.progress-bar-striped.progress-bar-animated role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
     form.mt-3 role="form" action="/attractions?search_term=" method="GET" id="attraction-search-form"
       .input-group.mb-3 id="attraction-search-input"
         input type="text" class="form-control" aria-describedby="search-submit" name="search-term" id="attraction-search-term" placeholder="國立清華大學"

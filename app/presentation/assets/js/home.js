@@ -102,7 +102,7 @@ function requestReccomendation(attraction, exclude) {
         setReccommendedMarker(reccommended_pin);
         setTimeout(() => {
           progress_div.style.display = 'none';
-        }, 1000);
+        }, 2000);
       }
     }
 }
