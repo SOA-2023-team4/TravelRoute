@@ -122,20 +122,33 @@ function createRating(rating) {
   return ratingElement;
 }
 
-function createReccomendationInfo(rec) {
+function createReccomendationInfo(rec, button = false) {
   let info = createDiv('info');
   let info_header = createHeader(5, 'card-title', rec['name']);
   let info_rating = createRating(rec['rating']);
   let info_text = createParagraph('card-text', rec['description']);
-  let info_button = createButton('btn btn-primary', 'Add to Plan');
-  info_button.setAttribute('id', rec['place_id']);
-  info_button.setAttribute('onclick', 'addAttraction(this)');
-  info_button.setAttribute('name', rec['name']);
   info.appendChild(info_header);
   info.appendChild(info_rating);
   info.appendChild(info_text);
-  info.appendChild(info_button);
+
+  if (button) {
+    let info_button = createButton('btn btn-primary', 'Add to Plan');
+    info_button.setAttribute('id', rec['place_id']);
+    info_button.setAttribute('onclick', 'addAttraction(this)');
+    info_button.setAttribute('name', rec['name']);
+    info.appendChild(info_button);
+  }
   return info;
+}
+
+function createProgressBar() {
+  let progress_bar = createDiv('progress-bar progress-bar-striped progress-bar-animated');
+  progress_bar.setAttribute('role', 'progressbar');
+  progress_bar.setAttribute('aria-valuenow', '0');
+  progress_bar.setAttribute('aria-valuemin', '0');
+  progress_bar.setAttribute('aria-valuemax', '100');
+  progress_bar.setAttribute('style', 'width: 0%');
+  return progress_bar;
 }
 
 async function createMarker(position, marker_info, pin = null) {

@@ -32,6 +32,7 @@ module TravelRoute
       routing.assets
       response['Content-Type'] = 'text/html; charset=utf-8'
       session[:key] = App.config.GMAP_TOKEN
+      session[:faye] = "#{App.config.API_HOST}/faye/faye.js"
 
       # GET /
       routing.root do

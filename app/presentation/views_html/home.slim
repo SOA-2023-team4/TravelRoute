@@ -1,7 +1,8 @@
 .row
   .col-6
     h2 Search for Attractions
-    form role="form" action="/attractions?search_term=" method="GET" id="attraction-search-form"
+    div.progress id="progress-bar" style="display: none; height: 20px"
+    form.mt-3 role="form" action="/attractions?search_term=" method="GET" id="attraction-search-form"
       .input-group.mb-3 id="attraction-search-input"
         input type="text" class="form-control" aria-describedby="search-submit" name="search-term" id="attraction-search-term" placeholder="國立清華大學"
         button type="submit" class="btn btn-primary" id="attraction-search-button" Search

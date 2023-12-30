@@ -39,6 +39,74 @@ function selectOrigin(element) {
   generate_plan_link.classList.add("btn-info");
 }
 
+function requestReccomendation(attraction, exclude) {
+  const xhr = new XMLHttpRequest();
+    console.log(attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(exclude)}`);
+    xhr.open("GET", attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(exclude)}`, true)
+    xhr.send();
+
+    xhr.onload = () => {
+      let progress_div = document.querySelector("#progress-bar");
+      if (xhr.status == 202) {
+        progress_div.innerHTML = "";
+        var response = JSON.parse(xhr.response);
+        console.log(response);
+        var message = response.message;
+        var request_id = message.request_id;
+        var apiHost = message.host
+        var client = new Faye.Client(`${apiHost}/faye/faye`)
+
+        var progress_bar = createProgressBar();
+        progress_div.appendChild(progress_bar);
+        progress_div.style.display = 'block';
+
+        client.subscribe(`/${request_id}`, (msg) => {
+          ws_msg = JSON.parse(msg)
+          progress_bar.setAttribute("style", `width: ${ws_msg.percent}%`)
+          progress_bar.setAttribute("aria-valuenow", ws_msg.percent)
+          progress_bar.innerHTML = `${ws_msg.message}`
+
+          if (ws_msg.percent < 30) {
+            progress_bar.classList.add("bg-danger");
+          } else if (ws_msg.percent < 50) {
+            progress_bar.classList.remove("bg-danger");
+            progress_bar.classList.add("bg-warning");
+          } else if (ws_msg.percent < 80) {
+            progress_bar.classList.remove("bg-warning");
+            progress_bar.classList.add("bg-info");
+          } else if (ws_msg.percent < 95) {
+            progress_bar.classList.remove("bg-info");
+            progress_bar.style.backgroundColor = "#20B2AA";
+          } else {
+            progress_bar.classList.remove("bg-info");
+            progress_bar.classList.add("bg-success");
+          }
+
+          console.log(ws_msg)
+
+          if (ws_msg.percent == 100) {
+            requestReccomendation(attraction, exclude)
+            client.disconnect()
+          }
+        })
+      } else {
+        reccommended_pin = [];
+        recommendations = JSON.parse(xhr.response)['attractions'];
+        recommendations.forEach((rec) => {
+          reccommended_pin.push({
+            "position": {"lat": rec["location"]["latitude"], "lng": rec["location"]["longitude"]},
+            "title": rec["name"],
+            "info": createReccomendationInfo(rec, true)
+          });
+        });
+        setReccommendedMarker(reccommended_pin);
+        setTimeout(() => {
+          progress_div.style.display = 'none';
+        }, 1000);
+      }
+    }
+}
+
 function addAttraction(element) {
   const cart = getCart();
   const key_list = Object.keys(cart);
@@ -54,25 +122,7 @@ function addAttraction(element) {
   xhr.onload = () => {
     let attraction = JSON.parse(xhr.response);
 
-    let rec_req = new XMLHttpRequest();
-    console.log(attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(to_exclude)}`);
-    rec_req.open("GET", attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(to_exclude)}`, true)
-    rec_req.send();
-
-    rec_req.onreadystatechange = () => {
-      if (rec_req.readyState == 4 && rec_req.status == 200) {
-        reccommended_pin = [];
-        recommendations = JSON.parse(rec_req.response)['attractions'];
-        recommendations.forEach((rec) => {
-          reccommended_pin.push({
-            "position": {"lat": rec["location"]["latitude"], "lng": rec["location"]["longitude"]},
-            "title": rec["name"],
-            "info": createReccomendationInfo(rec)
-          });
-        });
-        setReccommendedMarker(reccommended_pin);
-      }
-    }
+    requestReccomendation(attraction, to_exclude);
 
     if (!key_list.includes(attraction['place_id'])) {
       let attraction_list = document.querySelector("#attraction-list-body");
