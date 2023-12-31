@@ -62,9 +62,10 @@ module TravelRoute
               flash[:error] = add_result.failure
               routing.halt 500
             end
-            attraction = add_result.value!
-            attraction_view = Views::Attraction.new(attraction)
+            result = add_result.value!
+            attraction_view = Views::Attraction.new(result[:attraction])
             session[:cart].merge!(attraction_view.place_id.to_sym => attraction_view.to_map_pin)
+            response.status = result[:status]
             attraction_view.to_json
           end
 
