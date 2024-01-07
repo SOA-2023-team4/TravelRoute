@@ -22,6 +22,10 @@ function resetOrigin() {
 function selectOrigin(element) {
   resetOrigin();
   const input = element.querySelector('input');
+  const start_date = document.querySelector("#start-date");
+  const end_date = document.querySelector("#end-date");
+  const start_time = document.querySelector("#start-time");
+  const end_time = document.querySelector("#end-time");
 
   input.setAttribute("checked", "");
   element.parentElement.classList.add("list-group-item-info");
@@ -33,7 +37,9 @@ function selectOrigin(element) {
   label.appendChild(span);
 
   const generate_plan_link = document.querySelector("#generate-plan-link");
-  generate_plan_link.setAttribute("href", "/plans?origin=" + input.id);
+  generate_plan_link.setAttribute("href",
+    `/plans?origin=${input.id}&start_date=${start_date.value}&end_date=${end_date.value}&start_time=${start_time.value}&end_time=${end_time.value}`
+  );
   generate_plan_link.classList.remove("disabled");
   generate_plan_link.classList.remove("btn-dark");
   generate_plan_link.classList.add("btn-info");
@@ -41,7 +47,6 @@ function selectOrigin(element) {
 
 function requestReccomendation(attraction, exclude) {
   const xhr = new XMLHttpRequest();
-    console.log(attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(exclude)}`);
     xhr.open("GET", attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(exclude)}`, true)
     xhr.send();
 
@@ -50,7 +55,6 @@ function requestReccomendation(attraction, exclude) {
       if (xhr.status == 202) {
         progress_div.innerHTML = "";
         var response = JSON.parse(xhr.response);
-        console.log(response);
         var message = response.message;
         var request_id = message.request_id;
         var apiHost = message.host
@@ -81,8 +85,6 @@ function requestReccomendation(attraction, exclude) {
             progress_bar.classList.remove("bg-info");
             progress_bar.classList.add("bg-success");
           }
-
-          console.log(ws_msg)
 
           if (ws_msg.percent == 100) {
             requestReccomendation(attraction, exclude)
@@ -183,20 +185,9 @@ function removeAttraction(element) {
       generate_plan_button.classList.add("btn-dark");
       generate_plan_button.classList.remove("btn-info");
     }
-    console.log(select);
     card_list.remove();
     del_pin = JSON.parse(xhr.response);
     removePin(del_pin);
-  }
-}
-
-function removeSavedPlan(element) {
-  let form = element.parentElement;
-  const xhr = new XMLHttpRequest();
-  xhr.open("DELETE", "/plans", true)
-  xhr.send(JSON.stringify({"plan_name": form.plan_name.value}));
-  xhr.onload = () => {
-    element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.remove();
   }
 }
 

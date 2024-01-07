@@ -106,17 +106,16 @@ module TravelRoute
 
       routing.on 'plans' do
         routing.is do
-          # GET /plans?origin=
+          # GET /plans?origin=&start_date=&end_date=&start_time=&end_time=
           routing.get do
-            origin_id = Forms::GeneratePlan.new.call(routing.params)
+            request = Forms::GeneratePlan.new.call(routing.params)
             place_ids = session[:cart]
-            plan_req = Service::GeneratePlan.new.call(cart: place_ids, origin: origin_id)
+            plan_req = Service::GeneratePlan.new.call(cart: place_ids, request:)
 
             if plan_req.failure?
               flash[:error] = plan_req.failure
               routing.redirect '/'
             end
-
             plan = Views::Plan.new(plan_req)
 
             App.configure :production do

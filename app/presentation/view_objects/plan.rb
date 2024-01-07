@@ -5,19 +5,26 @@ require_relative 'route_attraction'
 module Views
   # View object for plan
   class Plan
-    attr_reader :name
+    attr_reader :plan
 
-    def initialize(plan, name = 'Untitled')
-      @plan = plan
-      @name = name
+    def initialize(plan)
+      @plan = plan.value!
     end
 
-    def plan
-      @plan.value!
+    def day_plans
+      @plan.day_plans
     end
 
-    def all_attractions
-      plan.attractions
+    def days
+      day_plans.count
+    end
+
+    def dates
+      day_plans.map(&:date)
+    end
+
+    def visit_durations
+      day_plans.map(&:visit_durations)
     end
 
     def origin
@@ -35,7 +42,9 @@ module Views
     end
 
     def to_pin
-      AttractionList.new(all_attractions).to_map_pins
+      visit_durations.map do |day|
+        day.map(&:attraction).map { Views::Attraction.new(_1).to_map_pin }
+      end
     end
   end
 end

@@ -23,8 +23,8 @@ module TravelRoute
         @request.add_attraction(place_id)
       end
 
-      def get_plan(origin:, attractions:)
-        @request.get_plan(origin:, attractions:)
+      def get_plan(attributes)
+        @request.get_plan(**attributes)
       end
 
       # HTTP Request
@@ -53,10 +53,17 @@ module TravelRoute
           get(['recommendations', place_id])
         end
 
-        def get_plan(origin:, attractions:)
+        def get_plan(**attributes)
+          origin = attributes[:origin]
+          attractions = attributes[:attractions]
+          start_date = attributes[:start_date]
+          end_date = attributes[:end_date]
+          start_time = attributes[:start_time]
+          end_time = attributes[:end_time]
+
           origin = attractions.index(origin)
           attraction_list = attractions.map(&:place_id).join(',')
-          params = { origin:, attractions: CGI.escape(attraction_list) }
+          params = { origin:, attractions: CGI.escape(attraction_list), start_date:, end_date:, start_time:, end_time: }
           get(['plans'], params:)
         end
 
