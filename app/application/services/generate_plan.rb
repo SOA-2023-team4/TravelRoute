@@ -25,7 +25,6 @@ module TravelRoute
 
       def make_entity(input)
         attractions = ListAttractions.new.call(cart: input[:cart]).value!
-        input[:origin] = attractions.find { |attraction| attraction.place_id == input[:origin] }
         Success(attractions:, **input)
       end
 

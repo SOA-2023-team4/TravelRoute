@@ -43,6 +43,7 @@ async function drawRoute(pin = 'pin-0') {
   planMarkers.forEach(marker => {
     marker.setMap(null);
   });
+  planMarkers = []
   
   // Create an array to store the markers
   directionsService

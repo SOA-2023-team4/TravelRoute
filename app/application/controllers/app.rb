@@ -106,7 +106,7 @@ module TravelRoute
 
       routing.on 'plans' do
         routing.is do
-          # GET /plans?origin=&start_date=&end_date=&start_time=&end_time=
+          # GET /plans?start_date=&end_date=&start_time=&end_time=
           routing.get do
             request = Forms::GeneratePlan.new.call(routing.params)
             place_ids = session[:cart]

@@ -7,8 +7,7 @@
     ul class="list-group" id="plan-cart"
     .card.border-light.mb-3 id="plan-list"
       .card-header
-        h4.card-title 
-          | Plan List
+        
         ul.nav.nav-pills role="tablist"
           - plan.dates.each_with_index do |date, index|
             li.nav-item role="presentation"
@@ -18,29 +17,31 @@
               - else
                 a.nav-link data-bs-toggle="tab" href="#day-#{index}" aria-selected="false" role="tab" onclick="drawRoute('pin-#{index}')"
                   | #{date}
+          li class="list-group-item d-flex justify-content-between align-items-center"
           - plan.visit_durations.each_with_index do |visit_duration, index|
-            div.tab-pane.fade.show.active id="day-#{index}" role="tabpanel"
-              - visit_duration.each do |order|
-                - attraction = order.attraction
-                li class="list-group-item d-flex justify-content-between align-items-center"
-                    .card-body
-                      .row
-                        .col-2
-                          p.card-text
-                            | #{Time.strptime(order.start, "%H:%M").strftime("%I:%M %p")}
-                          p.card-text
-                            | |
-                          p.card-text
-                            | #{Time.strptime(order.end, "%H:%M").strftime("%I:%M %p")}
-                        .col-10
-                          h5.card-title #{attraction.name}
-                          i class="fas fa-star"
-                          small class="text-muted" #{attraction.rating}
-                          p.card-text #{attraction.description}
-                      / - if attraction == plan.origin
-                      /   span.badge.bg-primary.rounded-pill ORIGIN
-                      / - if attraction == plan.last
-                      /   span.badge.bg-secondary.rounded-pill LAST
+            div.tab-content
+              div.tab-pane.fade.show.active id="day-#{index}" role="tabpanel"
+                - visit_duration.each do |order|
+                  - attraction = order.attraction
+                  / li class="list-group-item d-flex justify-content-between align-items-center"
+                  .card-body
+                    .row
+                      .col-2
+                        p.card-text
+                          | #{Time.strptime(order.start, "%H:%M").strftime("%I:%M %p")}
+                        p.card-text
+                          | |
+                        p.card-text
+                          | #{Time.strptime(order.end, "%H:%M").strftime("%I:%M %p")}
+                      .col-10
+                        h5.card-title #{attraction.name}
+                        i class="fas fa-star"
+                        small class="text-muted" #{attraction.rating}
+                        p.card-text #{attraction.description}
+                    / - if attraction == plan.origin
+                    /   span.badge.bg-primary.rounded-pill ORIGIN
+                    / - if attraction == plan.last
+                    /   span.badge.bg-secondary.rounded-pill LAST
     .d-grid.gap-2
       a type="button" class="btn btn-lg btn-info" id="generate-plan-link" href="/" Back to Home
 

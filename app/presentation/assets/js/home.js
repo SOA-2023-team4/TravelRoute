@@ -19,30 +19,17 @@ function resetOrigin() {
   }
 }
 
-function selectOrigin(element) {
-  resetOrigin();
-  const input = element.querySelector('input');
+function generatePlan() {
   const start_date = document.querySelector("#start-date");
   const end_date = document.querySelector("#end-date");
   const start_time = document.querySelector("#start-time");
   const end_time = document.querySelector("#end-time");
 
-  input.setAttribute("checked", "");
-  element.parentElement.classList.add("list-group-item-info");
-  
-  const label = element.parentElement.querySelector("label");
-  const span = document.createElement("span");
-  span.setAttribute("class", "badge bg-primary rounded-pill origin-badge");
-  span.innerHTML = "ORIGIN";
-  label.appendChild(span);
-
   const generate_plan_link = document.querySelector("#generate-plan-link");
   generate_plan_link.setAttribute("href",
-    `/plans?origin=${input.id}&start_date=${start_date.value}&end_date=${end_date.value}&start_time=${start_time.value}&end_time=${end_time.value}`
+  `/plans?start_date=${start_date.value}&end_date=${end_date.value}&start_time=${start_time.value}&end_time=${end_time.value}`
   );
-  generate_plan_link.classList.remove("disabled");
-  generate_plan_link.classList.remove("btn-dark");
-  generate_plan_link.classList.add("btn-info");
+  window.location.href = generate_plan_link.getAttribute("href");
 }
 
 function requestReccomendation(attraction, exclude) {

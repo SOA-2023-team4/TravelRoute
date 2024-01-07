@@ -54,16 +54,14 @@ module TravelRoute
         end
 
         def get_plan(**attributes)
-          origin = attributes[:origin]
           attractions = attributes[:attractions]
           start_date = attributes[:start_date]
           end_date = attributes[:end_date]
           start_time = attributes[:start_time]
           end_time = attributes[:end_time]
 
-          origin = attractions.index(origin)
           attraction_list = attractions.map(&:place_id).join(',')
-          params = { origin:, attractions: CGI.escape(attraction_list), start_date:, end_date:, start_time:, end_time: }
+          params = { attractions: CGI.escape(attraction_list), start_date:, end_date:, start_time:, end_time: }
           get(['plans'], params:)
         end
 

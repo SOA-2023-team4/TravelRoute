@@ -31,7 +31,7 @@
                   input type="time" class="form-control" id="start-time" name="start-time" value="09:00"
                 .col-6
                   label for="end-time" End Time
-                  input type="time" class="form-control" id="end-time" name="end-time" value="18:00"
+                  input type="time" class="form-control" id="end-time" name="end-time" value="19:00"
             span.text-danger
               | (Please click on one of the attractions to set it as the origin before continue)
           fieldset.scrollable.form-group id="attraction-list-body"
@@ -39,7 +39,7 @@
               li class="list-group-item list-group-item-action flex-column align-items-start"
                 .card-body.form-check
                   .row
-                    .col-11 onclick="selectOrigin(this)"
+                    .col-11
                       input class="form-check-input" type="radio" name="origin" id="#{attraction.place_id}" value="#{attraction.place_id}"
                       label class="form-check-label" for="#{attraction.place_id}"
                         h5.card-title #{attraction.name}
@@ -49,7 +49,7 @@
                     .col-1
                       a type="button" id="#{attraction.place_id}" class="btn btn-secondary btn-lg fas fa-trash" onclick="removeAttraction(this)"
       .d-grid.gap-2
-        a type="button" class="btn btn-lg btn-dark disabled" id="generate-plan-link" Generate Plan
+        a type="button" class="btn btn-lg btn-info" id="generate-plan-link" onclick="generatePlan()" Generate Plan
 
 == assets([:js, :map])
 == assets([:js, :home])
