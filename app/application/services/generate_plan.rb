@@ -16,22 +16,20 @@ module TravelRoute
       private
 
       def validate_input(input)
-        if input[:origin].success?
-          origin = input[:origin][:origin]
-          Success(input.merge(origin:))
+        if input[:request].success?
+          Success(input.merge(**input[:request].to_h).except(:request))
         else
           Failure(input.errors.values.join('; '))
         end
       end
 
       def make_entity(input)
-        cart = ListAttractions.new.call(cart: input[:cart]).value!
-        origin = cart.find { |attraction| attraction.place_id == input[:origin] }
-        Success(cart:, origin:)
+        attractions = ListAttractions.new.call(cart: input[:cart]).value!
+        Success(attractions:, **input)
       end
 
       def get_plan(input)
-        plan = Gateway::Api.new(App.config).get_plan(origin: input[:origin], attractions: input[:cart])
+        plan = Gateway::Api.new(App.config).get_plan(**input)
 
         Success(plan)
       rescue StandardError

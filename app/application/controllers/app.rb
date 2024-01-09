@@ -32,6 +32,7 @@ module TravelRoute
       routing.assets
       response['Content-Type'] = 'text/html; charset=utf-8'
       session[:key] = App.config.GMAP_TOKEN
+      session[:faye] = "#{App.config.API_HOST}/faye/faye.js"
 
       # GET /
       routing.root do
@@ -61,9 +62,10 @@ module TravelRoute
               flash[:error] = add_result.failure
               routing.halt 500
             end
-            attraction = add_result.value!
-            attraction_view = Views::Attraction.new(attraction)
+            result = add_result.value!
+            attraction_view = Views::Attraction.new(result[:attraction])
             session[:cart].merge!(attraction_view.place_id.to_sym => attraction_view.to_map_pin)
+            response.status = result[:status]
             attraction_view.to_json
           end
 
@@ -104,17 +106,16 @@ module TravelRoute
 
       routing.on 'plans' do
         routing.is do
-          # GET /plans?origin=
+          # GET /plans?start_date=&end_date=&start_time=&end_time=
           routing.get do
-            origin_id = Forms::GeneratePlan.new.call(routing.params)
+            request = Forms::GeneratePlan.new.call(routing.params)
             place_ids = session[:cart]
-            plan_req = Service::GeneratePlan.new.call(cart: place_ids, origin: origin_id)
+            plan_req = Service::GeneratePlan.new.call(cart: place_ids, request:)
 
             if plan_req.failure?
               flash[:error] = plan_req.failure
               routing.redirect '/'
             end
-
             plan = Views::Plan.new(plan_req)
 
             App.configure :production do

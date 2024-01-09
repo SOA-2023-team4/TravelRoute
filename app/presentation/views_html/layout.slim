@@ -34,6 +34,8 @@ html
       crossorigin="anonymous"
     }
 
+    script src="#{session[:faye]}"
+
     == assets([:js, :utils])
 
 
@@ -43,37 +45,7 @@ html
           a.text-underline-hover href="/" ShowDaPlan
         button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation"
           span class="navbar-toggler-icon"
-        .collapse.navbar-collapse id="navMenu"
-          ul.navbar-nav.me-auto
-            li.nav-item
-              a.nav-link.active href="/" Home
-              span.visually-hidden (current)
-            li.nav-item
-              a.nav-link.active href="#saved-plans" role="button" aria-controls="saved-plans" data-bs-toggle="offcanvas" My Plans
-            
-    / .container id='html_body'
-      section
-        .offcanvas.offcanvas-start tabindex="-1" id="saved-plans" aria-labelledby="saved-plans-label"
-          .offcanvas-header
-            h5 class="offcanvas-title mb-3" id="saved-plans-label" My saved plans
-            button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"
-          .offcanvas-body
-            ul class="list-group"
-            - session[:saved].each do |_, plan|
-              li class="list-group-item mt-3"
-                .row
-                  .col-6
-                    h5.card-title #{plan.name}
-                  .col-6
-                    .row
-                      .col-6
-                        form role="form" action="/plans" method="POST" 
-                          input type="hidden" name="_method" value="delete"
-                          input type="hidden" name="plan_name" value="#{plan.name}"
-                          button type="button" class="btn btn-danger" onclick="removeSavedPlan(this)" Delete
-                      .col-6
-                        a.btn.btn-primary href="/plans/#{plan.name}" View
-  
+
     section
       div.row
         div.col-sm-1

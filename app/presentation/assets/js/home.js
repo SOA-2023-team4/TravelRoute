@@ -19,24 +19,81 @@ function resetOrigin() {
   }
 }
 
-function selectOrigin(element) {
-  resetOrigin();
-  const input = element.querySelector('input');
-
-  input.setAttribute("checked", "");
-  element.parentElement.classList.add("list-group-item-info");
-  
-  const label = element.parentElement.querySelector("label");
-  const span = document.createElement("span");
-  span.setAttribute("class", "badge bg-primary rounded-pill origin-badge");
-  span.innerHTML = "ORIGIN";
-  label.appendChild(span);
+function generatePlan() {
+  const start_date = document.querySelector("#start-date");
+  const end_date = document.querySelector("#end-date");
+  const start_time = document.querySelector("#start-time");
+  const end_time = document.querySelector("#end-time");
 
   const generate_plan_link = document.querySelector("#generate-plan-link");
-  generate_plan_link.setAttribute("href", "/plans?origin=" + input.id);
-  generate_plan_link.classList.remove("disabled");
-  generate_plan_link.classList.remove("btn-dark");
-  generate_plan_link.classList.add("btn-info");
+  generate_plan_link.setAttribute("href",
+  `/plans?start_date=${start_date.value}&end_date=${end_date.value}&start_time=${start_time.value}&end_time=${end_time.value}`
+  );
+  window.location.href = generate_plan_link.getAttribute("href");
+}
+
+function requestReccomendation(attraction, exclude) {
+  const xhr = new XMLHttpRequest();
+    xhr.open("GET", attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(exclude)}`, true)
+    xhr.send();
+
+    xhr.onload = () => {
+      let progress_div = document.querySelector("#progress-bar");
+      if (xhr.status == 202) {
+        progress_div.innerHTML = "";
+        var response = JSON.parse(xhr.response);
+        var message = response.message;
+        var request_id = message.request_id;
+        var apiHost = message.host
+        var client = new Faye.Client(`${apiHost}/faye/faye`)
+
+        var progress_bar = createProgressBar();
+        progress_div.appendChild(progress_bar);
+        progress_div.style.display = 'block';
+
+        client.subscribe(`/${request_id}`, (msg) => {
+          ws_msg = JSON.parse(msg)
+          progress_bar.setAttribute("style", `width: ${ws_msg.percent}%`)
+          progress_bar.setAttribute("aria-valuenow", ws_msg.percent)
+          progress_bar.innerHTML = `${ws_msg.message}`
+
+          if (ws_msg.percent < 30) {
+            progress_bar.classList.add("bg-danger");
+          } else if (ws_msg.percent < 50) {
+            progress_bar.classList.remove("bg-danger");
+            progress_bar.classList.add("bg-warning");
+          } else if (ws_msg.percent < 80) {
+            progress_bar.classList.remove("bg-warning");
+            progress_bar.classList.add("bg-info");
+          } else if (ws_msg.percent < 95) {
+            progress_bar.classList.remove("bg-info");
+            progress_bar.style.backgroundColor = "#20B2AA";
+          } else {
+            progress_bar.classList.remove("bg-info");
+            progress_bar.classList.add("bg-success");
+          }
+
+          if (ws_msg.percent == 100) {
+            requestReccomendation(attraction, exclude)
+            client.disconnect()
+          }
+        })
+      } else {
+        reccommended_pin = [];
+        recommendations = JSON.parse(xhr.response)['attractions'];
+        recommendations.forEach((rec) => {
+          reccommended_pin.push({
+            "position": {"lat": rec["location"]["latitude"], "lng": rec["location"]["longitude"]},
+            "title": rec["name"],
+            "info": createReccomendationInfo(rec, true)
+          });
+        });
+        setReccommendedMarker(reccommended_pin);
+        setTimeout(() => {
+          progress_div.style.display = 'none';
+        }, 2000);
+      }
+    }
 }
 
 function addAttraction(element) {
@@ -54,25 +111,7 @@ function addAttraction(element) {
   xhr.onload = () => {
     let attraction = JSON.parse(xhr.response);
 
-    let rec_req = new XMLHttpRequest();
-    console.log(attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(to_exclude)}`);
-    rec_req.open("GET", attraction['reccomendation_url'] + `&exclude=${encodeURIComponent(to_exclude)}`, true)
-    rec_req.send();
-
-    rec_req.onreadystatechange = () => {
-      if (rec_req.readyState == 4 && rec_req.status == 200) {
-        reccommended_pin = [];
-        recommendations = JSON.parse(rec_req.response)['attractions'];
-        recommendations.forEach((rec) => {
-          reccommended_pin.push({
-            "position": {"lat": rec["location"]["latitude"], "lng": rec["location"]["longitude"]},
-            "title": rec["name"],
-            "info": createReccomendationInfo(rec)
-          });
-        });
-        setReccommendedMarker(reccommended_pin);
-      }
-    }
+    requestReccomendation(attraction, to_exclude);
 
     if (!key_list.includes(attraction['place_id'])) {
       let attraction_list = document.querySelector("#attraction-list-body");
@@ -133,20 +172,9 @@ function removeAttraction(element) {
       generate_plan_button.classList.add("btn-dark");
       generate_plan_button.classList.remove("btn-info");
     }
-    console.log(select);
     card_list.remove();
     del_pin = JSON.parse(xhr.response);
     removePin(del_pin);
-  }
-}
-
-function removeSavedPlan(element) {
-  let form = element.parentElement;
-  const xhr = new XMLHttpRequest();
-  xhr.open("DELETE", "/plans", true)
-  xhr.send(JSON.stringify({"plan_name": form.plan_name.value}));
-  xhr.onload = () => {
-    element.parentElement.parentElement.parentElement.parentElement.parentElement.parentElement.remove();
   }
 }
 

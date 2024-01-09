@@ -25,15 +25,15 @@ module TravelRoute
 
       def select_attraction(input)
         result = Gateway::Api.new(TravelRoute::App.config).add_attraction(input[:place_id])
-        result.success? ? Success(result.payload) : Failure(result.message)
+        result.success? ? Success(result) : Failure(result.message)
       rescue StandardError
         Failure('Could not connect to Travel Route API or place_id doesnt exist')
       end
 
-      def reify_attraction(attraction_json)
+      def reify_attraction(result)
         Representer::Attraction.new(OpenStruct.new)
-          .from_json(attraction_json)
-          .then { |attraction| Success(attraction) }
+          .from_json(result.payload)
+          .then { |attraction| Success(attraction:, status: result.status) }
       rescue StandardError
         Failure('Error in Attraction')
       end

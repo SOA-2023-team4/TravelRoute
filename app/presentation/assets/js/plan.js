@@ -1,5 +1,5 @@
-function getPlan(){
-  pins = document.querySelector("#pins");
+function getPlan(id = 'pin-0'){
+  pins = document.querySelector(`#${id}`);
 
   return JSON.parse(pins.value);
 }
@@ -15,30 +15,37 @@ function animateRoute(response) {
     strokeOpacity: 0.7,
     strokeWeight: 5,
   });
-
   let count = 0;
   const interval = window.setInterval(() => {
-    animatedPolyline.getPath().push(route[count]);
+    animated = animatedPolyline.getPath().push(route[count]);
     count++;
 
     if (count === route.length) {
+      previous_route = route;
       window.clearInterval(interval);
     }
   });
 }
 
-async function drawRoute() {
+let planMarkers = [];
+
+async function drawRoute(pin = 'pin-0') {
+  initMap();
   const { PinElement } = await google.maps.importLibrary(
     "marker",
   );
   directionsService = new google.maps.DirectionsService();
   directionsRenderer = new google.maps.DirectionsRenderer();
 
-  const plan = getPlan();
-  const planMarkers = [];
+  const plan = getPlan(pin);
+
+  // Clear the markers and the route
+  planMarkers.forEach(marker => {
+    marker.setMap(null);
+  });
+  planMarkers = []
   
   // Create an array to store the markers
-
   directionsService
   .route({
     origin: plan[0].position,
@@ -59,8 +66,6 @@ async function drawRoute() {
         strokeWeight: 5,
       },
     });
-    // directionsRenderer.setMap(map);
-
     // Iterate over each leg of the route and add markers with animation
     response.routes[0].legs.forEach(async (leg, i) => {
       const glyph = new PinElement({
@@ -91,10 +96,11 @@ async function drawRoute() {
       boundMarkers(planMarkers);
 
       // Animate the route
+      // Clear the polyline
+      directionsRenderer.setMap(null);
       animateRoute(response);
     });
   });
 }
 
-initMap();
 drawRoute();

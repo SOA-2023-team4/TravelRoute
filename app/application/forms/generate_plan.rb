@@ -7,7 +7,10 @@ module TravelRoute
     # Form validation for selected attraction
     class GeneratePlan < Dry::Validation::Contract
       params do
-        required(:origin).filled(:string)
+        required(:start_date).filled(:string)
+        required(:end_date).filled(:string)
+        required(:start_time).filled(:string)
+        required(:end_time).filled(:string)
       end
 
       rules do

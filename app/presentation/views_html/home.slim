@@ -1,7 +1,9 @@
 .row
   .col-6
     h2 Search for Attractions
-    form role="form" action="/attractions?search_term=" method="GET" id="attraction-search-form"
+    div.progress id="progress-bar" style="display: none; height: 20px"
+      div.progress-bar.progress-bar-striped.progress-bar-animated role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+    form.mt-3 role="form" action="/attractions?search_term=" method="GET" id="attraction-search-form"
       .input-group.mb-3 id="attraction-search-input"
         input type="text" class="form-control" aria-describedby="search-submit" name="search-term" id="attraction-search-term" placeholder="國立清華大學"
         button type="submit" class="btn btn-primary" id="attraction-search-button" Search
@@ -15,14 +17,29 @@
           .card-header
             h4.card-title 
               | Attraction List 
+            .card-body
+              .row
+                .col-6
+                  label for="start-date" Start Date
+                  input type="date" class="form-control" id="start-date" name="start-date" value="#{Date.today + 1}"
+                .col-6
+                  label for="end-date" End Date
+                  input type="date" class="form-control" id="end-date" name="end-date" value="#{Date.today + 1}"
+              .row
+                .col-6
+                  label for="start-time" Start Time
+                  input type="time" class="form-control" id="start-time" name="start-time" value="09:00"
+                .col-6
+                  label for="end-time" End Time
+                  input type="time" class="form-control" id="end-time" name="end-time" value="19:00"
             span.text-danger
-              | (Please click on one of the attractions to set it as the origin before continue)               
+              | (Please click on one of the attractions to set it as the origin before continue)
           fieldset.scrollable.form-group id="attraction-list-body"
             - cart.each do |attraction|
               li class="list-group-item list-group-item-action flex-column align-items-start"
                 .card-body.form-check
                   .row
-                    .col-11 onclick="selectOrigin(this)"
+                    .col-11
                       input class="form-check-input" type="radio" name="origin" id="#{attraction.place_id}" value="#{attraction.place_id}"
                       label class="form-check-label" for="#{attraction.place_id}"
                         h5.card-title #{attraction.name}
@@ -32,7 +49,7 @@
                     .col-1
                       a type="button" id="#{attraction.place_id}" class="btn btn-secondary btn-lg fas fa-trash" onclick="removeAttraction(this)"
       .d-grid.gap-2
-        a type="button" class="btn btn-lg btn-dark disabled" id="generate-plan-link" Generate Plan
+        a type="button" class="btn btn-lg btn-info" id="generate-plan-link" onclick="generatePlan()" Generate Plan
 
 == assets([:js, :map])
 == assets([:js, :home])

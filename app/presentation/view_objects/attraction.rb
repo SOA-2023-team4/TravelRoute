@@ -72,7 +72,8 @@ module Views
     def to_map_pin
       {
         position: { lat: latitude, lng: longitude },
-        title: name
+        title: name,
+        description:
       }
     end
   end

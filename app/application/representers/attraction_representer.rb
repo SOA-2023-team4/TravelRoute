@@ -2,6 +2,8 @@
 
 require 'roar/decorator'
 require 'roar/json'
+require_relative 'location_representer'
+require_relative 'opening_hour_list_representer'
 
 # Represents essential Repo information for API output
 module TravelRoute
@@ -17,9 +19,9 @@ module TravelRoute
       property :description
       property :address
       property :type
-      property :opening_hours
+      property :opening_hours, extend: Representer::OpeningHourList, class: OpenStruct
       property :rating
-      property :location
+      property :location, extend: Representer::Location, class: OpenStruct
       property :links
     end
   end
